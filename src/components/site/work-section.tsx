@@ -20,7 +20,7 @@ function ProjectThumb({ p }: { p: ProjectItem }) {
   return (
     <img
       src={p.img}
-      alt={`Pratinjau projek ${p.title}`}
+      alt={`Preview of project ${p.title}`}
       width={1200}
       height={600}
       loading="lazy"
@@ -29,7 +29,7 @@ function ProjectThumb({ p }: { p: ProjectItem }) {
   );
 }
 
-/** Panel pengaturan satu kartu projek (hanya tampil di Mode Edit). */
+/** Settings panel for one project card (only visible in Edit Mode). */
 function CardSettings({ p, onClose }: { p: ProjectItem; onClose: () => void }) {
   const { content, updateProject, removeProject } = useSite();
   const field = (key: keyof ProjectItem, label: string, type = "text") => (
@@ -43,20 +43,20 @@ function CardSettings({ p, onClose }: { p: ProjectItem; onClose: () => void }) {
     </label>
   );
   return (
-    <div className="card-settings" role="dialog" aria-label={`Pengaturan kartu ${p.title}`}>
+    <div className="card-settings" role="dialog" aria-label={`Card settings for ${p.title}`}>
       <div className="cs-head">
-        <span>Pengaturan kartu</span>
-        <button type="button" onClick={onClose} aria-label="Tutup">&times;</button>
+        <span>Card settings</span>
+        <button type="button" onClick={onClose} aria-label="Close">&times;</button>
       </div>
-      {field("title", "Judul")}
-      {field("small", "Subjudul (teknologi / tahun)")}
-      {field("hook", "Hook (satu kalimat menarik)")}
-      {field("url", "URL (GitHub, website, dll)")}
-      {field("lang", "Bahasa / teknologi utama")}
-      {field("tag", "Label chip di thumbnail")}
-      {field("img", "URL gambar thumbnail (kosongkan = fallback)")}
+      {field("title", "Title")}
+      {field("small", "Subtitle (tech / year)")}
+      {field("hook", "Hook (one catchy sentence)")}
+      {field("url", "URL (GitHub, website, etc.)")}
+      {field("lang", "Main language / tech")}
+      {field("tag", "Chip label on thumbnail")}
+      {field("img", "Thumbnail image URL (empty = fallback)")}
       <label className="cs-field">
-        <span>Kategori</span>
+        <span>Category</span>
         <select value={p.cat} onChange={(e) => updateProject(p.id, { cat: e.target.value })}>
           {content.work.tabs
             .filter((t) => t.id !== "all")
@@ -71,13 +71,13 @@ function CardSettings({ p, onClose }: { p: ProjectItem; onClose: () => void }) {
         type="button"
         className="cs-delete"
         onClick={() => {
-          if (window.confirm(`Hapus kartu "${p.title}" dari daftar?`)) {
+          if (window.confirm(`Delete the card "${p.title}" from the list?`)) {
             removeProject(p.id);
             onClose();
           }
         }}
       >
-        Hapus kartu ini
+        Delete this card
       </button>
     </div>
   );
@@ -97,9 +97,17 @@ export function WorkSection() {
   const shown =
     tab === "all" ? content.projects : content.projects.filter((p) => p.cat === tab);
 
+  // Red spotlight follows the pointer across the card surface.
+  const spot = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
   return (
     <section className="section" id="work" aria-labelledby="work-title">
-      <div className="section-head">
+      <Rv className="section-head">
         <div>
           <p className="label">
             <b>{content.work.num}</b> / <Ed p="work.label" />
@@ -113,29 +121,31 @@ export function WorkSection() {
         <p className="small">
           <Ed p="work.aside" />
         </p>
-      </div>
+      </Rv>
 
-      <div className="tabs" role="tablist" aria-label="Filter projek">
-        {content.work.tabs.map((t) => {
-          const n = t.id === "all" ? content.projects.length : (counts.get(t.id) ?? 0);
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === t.id}
-              className={cn("tab", tab === t.id && "is-active")}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-              <sup>{n}</sup>
-            </button>
-          );
-        })}
-      </div>
+      <Rv className="tabs-wrap">
+        <div className="tabs" role="tablist" aria-label="Filter projects">
+          {content.work.tabs.map((t) => {
+            const n = t.id === "all" ? content.projects.length : (counts.get(t.id) ?? 0);
+            return (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                className={cn("tab", tab === t.id && "is-active")}
+                onClick={() => setTab(t.id)}
+              >
+                {t.label}
+                <sup>{n}</sup>
+              </button>
+            );
+          })}
+        </div>
+      </Rv>
 
       <div className="work-grid">
-        {shown.map((p) => {
+        {shown.map((p, idx) => {
           const no = String(content.projects.indexOf(p) + 1).padStart(2, "0");
           const inner = (
             <>
@@ -146,7 +156,7 @@ export function WorkSection() {
               <div className="meta">
                 <span className="no">{no}</span>
                 <span className="ttl">
-                  {editing ? p.title : p.title}
+                  {p.title}
                   <small>
                     {p.small}
                     <span className="lang-chip">{p.lang}</span>
@@ -159,7 +169,7 @@ export function WorkSection() {
                     type="button"
                     className="card-gear"
                     onClick={() => setOpenSettings(openSettings === p.id ? null : p.id)}
-                    aria-label={`Pengaturan kartu ${p.title}`}
+                    aria-label={`Card settings for ${p.title}`}
                     aria-expanded={openSettings === p.id}
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -173,9 +183,9 @@ export function WorkSection() {
           );
 
           return (
-            <Rv className="card-wrap" key={p.id}>
+            <Rv className="card-wrap" key={p.id} delay={(idx % 3) * 70}>
               {editing ? (
-                <div className="card is-editing" aria-label={`Kartu projek ${p.title}`}>
+                <div className="card is-editing" aria-label={`Project card ${p.title}`}>
                   {inner}
                 </div>
               ) : (
@@ -184,6 +194,9 @@ export function WorkSection() {
                   href={p.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-cursor="view"
+                  data-cursor-label="Open"
+                  onMouseMove={spot}
                   onClick={(e) => {
                     if (p.url === "#") e.preventDefault();
                   }}
@@ -202,16 +215,16 @@ export function WorkSection() {
       {editing && (
         <div className="add-row">
           <button type="button" className="btn btn-line" onClick={addProject}>
-            + Tambah projek
+            + {content.work.addBtn}
           </button>
         </div>
       )}
 
-      <p className="grid-note">
+      <Rv as="p" className="grid-note">
         <Ed p="work.note" />
-      </p>
+      </Rv>
 
-      <div className="tools">
+      <Rv className="tools">
         <p className="label">
           <Ed p="work.toolsLabel" />
           <br />
@@ -222,7 +235,7 @@ export function WorkSection() {
             <li key={`tool-${i}`}>{tl}</li>
           ))}
         </ul>
-      </div>
+      </Rv>
     </section>
   );
 }

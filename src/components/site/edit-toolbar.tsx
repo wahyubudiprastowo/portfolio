@@ -27,67 +27,67 @@ export function EditToolbar() {
     const ok = await importJson(f);
     setImporting(false);
     if (ok) {
-      toast.success("Konten berhasil diimpor.");
+      toast.success("Content imported successfully.");
     } else {
-      toast.error("File tidak valid. Harus berupa content.json dari situs ini.");
+      toast.error("Invalid file. It must be a content.json exported from this site.");
     }
     if (fileRef.current) fileRef.current.value = "";
   };
 
   return (
-    <div className={cn("editbar", editing && "is-editing")} role="toolbar" aria-label="Toolbar edit konten">
+    <div className={cn("editbar", editing && "is-editing")} role="toolbar" aria-label="Content editing toolbar">
       <button
         type="button"
         className={cn("eb-btn eb-main", editing && "is-on")}
         onClick={() => {
           setEditing(!editing);
-          if (!editing) toast.info("Mode Edit aktif — klik teks mana pun untuk mengubahnya.");
+          if (!editing) toast.info("Edit Mode is on — click any text to change it.");
         }}
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
         </svg>
-        {editing ? "Selesai" : "Mode Edit"}
+        {editing ? "Done" : "Edit Mode"}
       </button>
 
       {editing && (
         <>
-          <button type="button" className="eb-btn" onClick={exportJson} title="Unduh content.json untuk dipublikasikan ke GitHub">
-            Ekspor
+          <button type="button" className="eb-btn" onClick={exportJson} title="Download content.json to publish it to GitHub">
+            Export
           </button>
           <button
             type="button"
             className="eb-btn"
             onClick={() => fileRef.current?.click()}
             disabled={importing}
-            title="Muat ulang konten dari file content.json"
+            title="Reload content from a content.json file"
           >
-            Impor
+            Import
           </button>
           <button
             type="button"
             className="eb-btn eb-danger"
             onClick={() => {
               if (!isModified) {
-                toast.info("Belum ada perubahan yang disimpan.");
+                toast.info("No changes are stored yet.");
                 return;
               }
-              if (window.confirm("Buang semua perubahan di browser ini dan kembali ke konten asli?")) {
+              if (window.confirm("Discard all changes stored in this browser and restore the original content?")) {
                 resetContent();
-                toast.success("Konten direset ke bawaan.");
+                toast.success("Content reset to defaults.");
               }
             }}
           >
             Reset
           </button>
           <span className="eb-status" aria-live="polite">
-            {saveStatus === "saving" ? "Menyimpan..." : saveStatus === "saved" ? "Tersimpan di browser" : "Siap"}
+            {saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved in this browser" : "Ready"}
           </span>
         </>
       )}
 
       {!editing && isModified && (
-        <span className="eb-status">Ada perubahan tersimpan di browser ini</span>
+        <span className="eb-status">Changes are stored in this browser</span>
       )}
 
       <input

@@ -31,8 +31,14 @@ export function Rv({
   children: React.ReactNode;
   className?: string;
   delay?: number;
-  as?: "div" | "span" | "section" | "li" | "p" | "h2" | "h3" | "article" | "figure";
-} & Omit<React.HTMLAttributes<HTMLElement>, "as">) {
+  as?: "div" | "span" | "section" | "li" | "p" | "h2" | "h3" | "article" | "figure" | "a";
+} & Omit<React.HTMLAttributes<HTMLElement>, "as"> & {
+  /** anchor-only props (dipakai saat as="a") */
+  href?: string;
+  target?: string;
+  rel?: string;
+  download?: string | boolean;
+}) {
   const ref = useRef<HTMLElement | null>(null);
   const [seen, setSeen] = useState(false);
 

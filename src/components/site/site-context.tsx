@@ -40,9 +40,27 @@ interface SiteCtx {
 
 const Ctx = createContext<SiteCtx | null>(null);
 
-/** Gabungan ringan: field yang hilang di data tersimpan diisi dari default. */
+/** Cek objek polos (bukan array/null). */
+function isPlainObj(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+/**
+ * Deep merge: field yang hilang di data tersimpan (mis. hero.floatTags dari
+ * versi content.json lama) diisi dari default, tanpa menghapus array milik
+ * pengguna (projects, tabs, dst. tetap diganti utuh bila ada di saved).
+ */
+function deepMerge<T>(base: T, over: unknown): T {
+  if (!isPlainObj(base) || !isPlainObj(over)) return (over === undefined ? base : (over as T));
+  const out: Record<string, unknown> = { ...base };
+  for (const k of Object.keys(over)) {
+    out[k] = k in base ? deepMerge((base as Record<string, unknown>)[k], over[k]) : over[k];
+  }
+  return out as T;
+}
+
 function mergeWithDefault(saved: unknown): SiteContent {
-  return { ...DEFAULT_CONTENT, ...(saved as Partial<SiteContent>) };
+  return deepMerge(DEFAULT_CONTENT, saved);
 }
 
 export function SiteProvider({ children }: { children: React.ReactNode }) {
@@ -69,7 +87,9 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         const saved = localStorage.getItem(LS_KEY);
         if (saved) {
           loaded = mergeWithDefault(JSON.parse(saved));
-          setIsModified(true);
+          // Hanya tandai "ada perubahan" bila isinya benar-benar beda
+          // dari konten bawaan (mis. setelah Reset).
+          setIsModified(JSON.stringify(loaded) !== JSON.stringify(DEFAULT_CONTENT));
         }
       } catch {
         /* abaikan */
@@ -87,6 +107,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
+  // Keep the browser tab title in sync with the editable meta.title.
+  useEffect(() => {
+    if (content.meta?.title) document.title = content.meta.title;
+  }, [content.meta?.title]);
+
   // Autosave ke localStorage setiap konten berubah
   useEffect(() => {
     if (!mounted) return;
@@ -98,7 +123,9 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
       setSaveStatus("saving");
       try {
         localStorage.setItem(LS_KEY, JSON.stringify(content));
-        setIsModified(true);
+        // Konten identik dengan default tidak dianggap "ada perubahan"
+        // (mis. setelah Reset), agar indikator toolbar tidak menyesatkan.
+        setIsModified(JSON.stringify(content) !== JSON.stringify(DEFAULT_CONTENT));
         setSaveStatus("saved");
       } catch {
         setSaveStatus("idle");
@@ -127,9 +154,9 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         ...c.projects,
         {
           id: `p-${Date.now()}`,
-          title: "Projek Baru",
-          small: "Deskripsi singkat / Teknologi",
-          hook: "Tulis satu kalimat yang menjelaskan kenapa projek ini menarik.",
+          title: "New Project",
+          small: "Short description / Tech",
+          hook: "Write one sentence explaining why this project is interesting.",
           url: "https://github.com/wahyubudiprastowo",
           cat: "apps",
           tag: "New",
@@ -233,6 +260,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 export function useSite(): SiteCtx {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useSite harus dipakai di dalam SiteProvider");
+  if (!ctx) throw new Error("useSite must be used inside SiteProvider");
   return ctx;
 }

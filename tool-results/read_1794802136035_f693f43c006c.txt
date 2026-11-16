@@ -1,0 +1,1363 @@
+     1→@import "tailwindcss";
+     2→@import "tw-animate-css";
+     3→
+     4→@custom-variant dark (&:is(.dark *));
+     5→
+     6→@theme inline {
+     7→  --color-background: var(--background);
+     8→  --color-foreground: var(--foreground);
+     9→  --font-sans: var(--font-inter);
+    10→  --font-mono: var(--font-geist-mono);
+    11→  --font-display: var(--font-anton);
+    12→  --font-hand: var(--font-caveat);
+    13→  --color-sidebar-ring: var(--sidebar-ring);
+    14→  --color-sidebar-border: var(--sidebar-border);
+    15→  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    16→  --color-sidebar-accent: var(--sidebar-accent);
+    17→  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    18→  --color-sidebar-primary: var(--sidebar-primary);
+    19→  --color-sidebar-foreground: var(--sidebar-foreground);
+    20→  --color-sidebar: var(--sidebar);
+    21→  --color-chart-5: var(--chart-5);
+    22→  --color-chart-4: var(--chart-4);
+    23→  --color-chart-3: var(--chart-3);
+    24→  --color-chart-2: var(--chart-2);
+    25→  --color-chart-1: var(--chart-1);
+    26→  --color-ring: var(--ring);
+    27→  --color-input: var(--input);
+    28→  --color-border: var(--border);
+    29→  --color-destructive: var(--destructive);
+    30→  --color-accent-foreground: var(--accent-foreground);
+    31→  --color-accent: var(--accent);
+    32→  --color-muted-foreground: var(--muted-foreground);
+    33→  --color-muted: var(--muted);
+    34→  --color-secondary-foreground: var(--secondary-foreground);
+    35→  --color-secondary: var(--secondary);
+    36→  --color-primary-foreground: var(--primary-foreground);
+    37→  --color-primary: var(--primary);
+    38→  --color-popover-foreground: var(--popover-foreground);
+    39→  --color-popover: var(--popover);
+    40→  --color-card-foreground: var(--card-foreground);
+    41→  --color-card: var(--card);
+    42→  --radius-sm: calc(var(--radius) - 4px);
+    43→  --radius-md: calc(var(--radius) - 2px);
+    44→  --radius-lg: var(--radius);
+    45→  --radius-xl: calc(var(--radius) + 4px);
+    46→}
+    47→
+    48→:root {
+    49→  --radius: 0.625rem;
+    50→  --background: oklch(1 0 0);
+    51→  --foreground: oklch(0.145 0 0);
+    52→  --card: oklch(1 0 0);
+    53→  --card-foreground: oklch(0.145 0 0);
+    54→  --popover: oklch(1 0 0);
+    55→  --popover-foreground: oklch(0.145 0 0);
+    56→  --primary: oklch(0.205 0 0);
+    57→  --primary-foreground: oklch(0.985 0 0);
+    58→  --secondary: oklch(0.97 0 0);
+    59→  --secondary-foreground: oklch(0.205 0 0);
+    60→  --muted: oklch(0.97 0 0);
+    61→  --muted-foreground: oklch(0.556 0 0);
+    62→  --accent: oklch(0.97 0 0);
+    63→  --accent-foreground: oklch(0.205 0 0);
+    64→  --destructive: oklch(0.577 0.245 27.325);
+    65→  --border: oklch(0.922 0 0);
+    66→  --input: oklch(0.922 0 0);
+    67→  --ring: oklch(0.708 0 0);
+    68→  --chart-1: oklch(0.646 0.222 41.116);
+    69→  --chart-2: oklch(0.6 0.118 184.704);
+    70→  --chart-3: oklch(0.398 0.07 227.392);
+    71→  --chart-4: oklch(0.828 0.189 84.429);
+    72→  --chart-5: oklch(0.769 0.188 70.08);
+    73→  --sidebar: oklch(0.985 0 0);
+    74→  --sidebar-foreground: oklch(0.145 0 0);
+    75→  --sidebar-primary: oklch(0.205 0 0);
+    76→  --sidebar-primary-foreground: oklch(0.985 0 0);
+    77→  --sidebar-accent: oklch(0.97 0 0);
+    78→  --sidebar-accent-foreground: oklch(0.205 0 0);
+    79→  --sidebar-border: oklch(0.922 0 0);
+    80→  --sidebar-ring: oklch(0.708 0 0);
+    81→}
+    82→
+    83→.dark {
+    84→  --background: oklch(0.145 0 0);
+    85→  --foreground: oklch(0.985 0 0);
+    86→  --card: oklch(0.205 0 0);
+    87→  --card-foreground: oklch(0.985 0 0);
+    88→  --popover: oklch(0.205 0 0);
+    89→  --popover-foreground: oklch(0.985 0 0);
+    90→  --primary: oklch(0.922 0 0);
+    91→  --primary-foreground: oklch(0.205 0 0);
+    92→  --secondary: oklch(0.269 0 0);
+    93→  --secondary-foreground: oklch(0.985 0 0);
+    94→  --muted: oklch(0.269 0 0);
+    95→  --muted-foreground: oklch(0.708 0 0);
+    96→  --accent: oklch(0.269 0 0);
+    97→  --accent-foreground: oklch(0.985 0 0);
+    98→  --destructive: oklch(0.704 0.191 22.216);
+    99→  --border: oklch(1 0 0 / 10%);
+   100→  --input: oklch(1 0 0 / 15%);
+   101→  --ring: oklch(0.556 0 0);
+   102→  --chart-1: oklch(0.488 0.243 264.376);
+   103→  --chart-2: oklch(0.696 0.17 162.48);
+   104→  --chart-3: oklch(0.769 0.188 70.08);
+   105→  --chart-4: oklch(0.627 0.265 303.9);
+   106→  --chart-5: oklch(0.645 0.246 16.439);
+   107→  --sidebar: oklch(0.205 0 0);
+   108→  --sidebar-foreground: oklch(0.985 0 0);
+   109→  --sidebar-primary: oklch(0.488 0.243 264.376);
+   110→  --sidebar-primary-foreground: oklch(0.985 0 0);
+   111→  --sidebar-accent: oklch(0.269 0 0);
+   112→  --sidebar-accent-foreground: oklch(0.985 0 0);
+   113→  --sidebar-border: oklch(1 0 0 / 10%);
+   114→  --sidebar-ring: oklch(0.556 0 0);
+   115→}
+   116→
+   117→@layer base {
+   118→  * {
+   119→    @apply border-border outline-ring/50;
+   120→  }
+   121→  body {
+   122→    @apply bg-background text-foreground;
+   123→  }
+   124→}
+   125→
+   126→/* ================================================================
+   127→   WAHYU PORTFOLIO — gaya visual terinspirasi popolab-tw.github.io
+   128→   Hitam pekat #050505 + aksen merah #ff1e2d + tipografi Anton.
+   129→   ================================================================ */
+   130→
+   131→:root {
+   132→  --red: #ff1e2d;
+   133→  --red-dim: rgba(255, 30, 45, 0.14);
+   134→  --ink: #f4f4f5;
+   135→  --mut: #a1a1a6;
+   136→  --mut-2: #6d6d72;
+   137→  --line: rgba(255, 255, 255, 0.09);
+   138→  --line-soft: rgba(255, 255, 255, 0.045);
+   139→  --panel: #0c0c0e;
+   140→  --panel-2: #101013;
+   141→  --w: 1240px;
+   142→}
+   143→
+   144→.site-root {
+   145→  background: #050505;
+   146→  color: var(--ink);
+   147→  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+   148→  letter-spacing: 0.01em;
+   149→  position: relative;
+   150→  overflow-x: clip;
+   151→}
+   152→
+   153→.font-display {
+   154→  font-family: var(--font-anton), var(--font-inter), sans-serif;
+   155→}
+   156→.font-hand {
+   157→  font-family: var(--font-caveat), cursive;
+   158→}
+   159→
+   160→/* ---------- noise + garis vertikal khas ---------- */
+   161→.grain {
+   162→  position: fixed;
+   163→  inset: 0;
+   164→  z-index: 40;
+   165→  pointer-events: none;
+   166→  opacity: 0.05;
+   167→  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
+   168→  mix-blend-mode: overlay;
+   169→}
+   170→.guides {
+   171→  position: fixed;
+   172→  inset: 0;
+   173→  z-index: 0;
+   174→  pointer-events: none;
+   175→  max-width: var(--w);
+   176→  margin: 0 auto;
+   177→  padding: 0 28px;
+   178→  display: grid;
+   179→  grid-template-columns: repeat(6, 1fr);
+   180→}
+   181→.guides span {
+   182→  border-left: 1px solid var(--line-soft);
+   183→}
+   184→.guides span:last-child {
+   185→  border-right: 1px solid var(--line-soft);
+   186→}
+   187→
+   188→/* ---------- header ---------- */
+   189→.site-header {
+   190→  position: fixed;
+   191→  top: 0;
+   192→  left: 0;
+   193→  right: 0;
+   194→  z-index: 50;
+   195→  backdrop-filter: blur(14px);
+   196→  background: rgba(5, 5, 5, 0.72);
+   197→  border-bottom: 1px solid var(--line);
+   198→}
+   199→.site-header .bar {
+   200→  max-width: var(--w);
+   201→  margin: 0 auto;
+   202→  padding: 14px 28px;
+   203→  display: flex;
+   204→  align-items: center;
+   205→  gap: 28px;
+   206→}
+   207→.logo {
+   208→  display: inline-flex;
+   209→  align-items: baseline;
+   210→  gap: 5px;
+   211→  color: var(--ink);
+   212→  text-decoration: none;
+   213→  font-size: 22px;
+   214→  letter-spacing: 0.04em;
+   215→  line-height: 1;
+   216→}
+   217→.logo .dot {
+   218→  width: 7px;
+   219→  height: 7px;
+   220→  border-radius: 50%;
+   221→  background: var(--red);
+   222→  transform: translateY(-2px);
+   223→}
+   224→.nav {
+   225→  display: flex;
+   226→  gap: 22px;
+   227→  margin-left: 12px;
+   228→}
+   229→.nav a {
+   230→  color: var(--mut);
+   231→  text-decoration: none;
+   232→  font-size: 13px;
+   233→  font-weight: 600;
+   234→  letter-spacing: 0.14em;
+   235→  text-transform: uppercase;
+   236→  transition: color 0.2s;
+   237→}
+   238→.nav a:hover {
+   239→  color: var(--red);
+   240→}
+   241→.hd-right {
+   242→  margin-left: auto;
+   243→  display: flex;
+   244→  align-items: center;
+   245→  gap: 10px;
+   246→}
+   247→.motion-toggle,
+   248→.edit-toggle {
+   249→  display: inline-flex;
+   250→  align-items: center;
+   251→  gap: 7px;
+   252→  background: transparent;
+   253→  border: 1px solid var(--line);
+   254→  color: var(--mut);
+   255→  border-radius: 999px;
+   256→  padding: 7px 14px;
+   257→  font-size: 12px;
+   258→  font-weight: 700;
+   259→  letter-spacing: 0.08em;
+   260→  cursor: pointer;
+   261→  transition: all 0.2s;
+   262→  min-height: 34px;
+   263→}
+   264→.motion-toggle:hover {
+   265→  color: var(--ink);
+   266→  border-color: rgba(255, 255, 255, 0.25);
+   267→}
+   268→.motion-toggle.is-off .st {
+   269→  color: var(--mut-2);
+   270→}
+   271→.motion-toggle .ic {
+   272→  font-size: 9px;
+   273→  color: var(--red);
+   274→}
+   275→.edit-toggle {
+   276→  background: var(--ink);
+   277→  color: #0a0a0a;
+   278→  border-color: var(--ink);
+   279→}
+   280→.edit-toggle:hover {
+   281→  background: #fff;
+   282→}
+   283→.edit-toggle.is-on {
+   284→  background: var(--red);
+   285→  border-color: var(--red);
+   286→  color: #fff;
+   287→}
+   288→
+   289→/* ---------- layout halaman ---------- */
+   290→.page {
+   291→  position: relative;
+   292→  z-index: 1;
+   293→}
+   294→.section {
+   295→  max-width: var(--w);
+   296→  margin: 0 auto;
+   297→  padding: 110px 28px 40px;
+   298→  position: relative;
+   299→}
+   300→.label {
+   301→  font-size: 12px;
+   302→  letter-spacing: 0.18em;
+   303→  text-transform: uppercase;
+   304→  color: var(--mut);
+   305→  font-weight: 600;
+   306→}
+   307→.label b {
+   308→  color: var(--red);
+   309→  font-weight: 800;
+   310→}
+   311→.h-en {
+   312→  font-size: clamp(44px, 7vw, 92px);
+   313→  line-height: 0.95;
+   314→  letter-spacing: 0.01em;
+   315→  margin-top: 14px;
+   316→  color: var(--ink);
+   317→  text-transform: uppercase;
+   318→}
+   319→.h-zh {
+   320→  display: inline-block;
+   321→  margin-top: 12px;
+   322→  font-size: clamp(16px, 2vw, 21px);
+   323→  color: var(--mut);
+   324→  font-weight: 500;
+   325→}
+   326→.h-zh .r,
+   327→.r {
+   328→  color: var(--red);
+   329→}
+   330→.section-head {
+   331→  display: flex;
+   332→  align-items: flex-end;
+   333→  justify-content: space-between;
+   334→  gap: 24px;
+   335→  margin-bottom: 44px;
+   336→}
+   337→.section-head .small {
+   338→  color: var(--mut-2);
+   339→  font-size: 13px;
+   340→  letter-spacing: 0.08em;
+   341→  text-transform: uppercase;
+   342→  font-weight: 600;
+   343→  white-space: nowrap;
+   344→}
+   345→
+   346→/* ---------- hero ---------- */
+   347→.hero {
+   348→  max-width: var(--w);
+   349→  margin: 0 auto;
+   350→  padding: 150px 28px 26px;
+   351→  position: relative;
+   352→  display: grid;
+   353→  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+   354→  grid-template-areas:
+   355→    "mega mega"
+   356→    "left visual"
+   357→    "left right"
+   358→    "strip strip";
+   359→  column-gap: 44px;
+   360→}
+   361→.hero .mega {
+   362→  grid-area: mega;
+   363→  font-size: clamp(80px, 18.5vw, 275px);
+   364→  line-height: 0.8;
+   365→  color: rgba(255, 255, 255, 0.05);
+   366→  user-select: none;
+   367→  pointer-events: none;
+   368→  margin: 0 0 6px -6px;
+   369→  white-space: nowrap;
+   370→}
+   371→.hero-left {
+   372→  grid-area: left;
+   373→  padding-top: 8px;
+   374→}
+   375→.hello {
+   376→  display: inline-block;
+   377→  font-size: 13px;
+   378→  letter-spacing: 0.22em;
+   379→  text-transform: uppercase;
+   380→  color: var(--mut);
+   381→  border: 1px solid var(--line);
+   382→  border-radius: 999px;
+   383→  padding: 7px 14px;
+   384→  margin-bottom: 18px;
+   385→}
+   386→.hero-name {
+   387→  font-size: clamp(46px, 6.4vw, 96px);
+   388→  line-height: 0.98;
+   389→  letter-spacing: 0.01em;
+   390→  text-transform: uppercase;
+   391→  margin: 0 0 18px;
+   392→  color: var(--ink);
+   393→}
+   394→.hero-name .typed::after {
+   395→  content: "";
+   396→  display: inline-block;
+   397→  width: 3px;
+   398→  height: 0.9em;
+   399→  background: var(--red);
+   400→  margin-left: 6px;
+   401→  transform: translateY(0.08em);
+   402→  animation: caret 1.05s steps(1) infinite;
+   403→}
+   404→@keyframes caret {
+   405→  50% {
+   406→    opacity: 0;
+   407→  }
+   408→}
+   409→html.no-motion .hero-name .typed::after {
+   410→  animation: none;
+   411→}
+   412→.hero-name .r {
+   413→  color: var(--red);
+   414→}
+   415→.hero-role {
+   416→  font-family: var(--font-geist-mono), monospace;
+   417→  font-size: clamp(13px, 1.6vw, 16px);
+   418→  letter-spacing: 0.06em;
+   419→  text-transform: uppercase;
+   420→  color: var(--red);
+   421→  white-space: pre-line;
+   422→  margin: 0 0 16px;
+   423→  font-weight: 500;
+   424→}
+   425→.hero-desc {
+   426→  color: var(--mut);
+   427→  font-size: clamp(14.5px, 1.7vw, 17px);
+   428→  line-height: 1.75;
+   429→  max-width: 56ch;
+   430→  margin: 0 0 28px;
+   431→}
+   432→.hero-cta {
+   433→  display: flex;
+   434→  align-items: center;
+   435→  gap: 26px;
+   436→  flex-wrap: wrap;
+   437→}
+   438→.btn {
+   439→  display: inline-flex;
+   440→  align-items: center;
+   441→  gap: 10px;
+   442→  border-radius: 999px;
+   443→  padding: 13px 26px;
+   444→  font-size: 14.5px;
+   445→  font-weight: 700;
+   446→  letter-spacing: 0.02em;
+   447→  text-decoration: none;
+   448→  cursor: pointer;
+   449→  transition: transform 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
+   450→  min-height: 44px;
+   451→}
+   452→.btn-red {
+   453→  background: var(--red);
+   454→  color: #fff;
+   455→  border: 1px solid var(--red);
+   456→}
+   457→.btn-red:hover {
+   458→  background: #e01020;
+   459→  transform: translateY(-2px);
+   460→}
+   461→.btn-line {
+   462→  background: transparent;
+   463→  color: var(--ink);
+   464→  border: 1px solid var(--line);
+   465→}
+   466→.btn-line:hover {
+   467→  border-color: var(--red);
+   468→  color: var(--red);
+   469→  transform: translateY(-2px);
+   470→}
+   471→.btn .down {
+   472→  font-size: 15px;
+   473→}
+   474→.link {
+   475→  color: var(--ink);
+   476→  text-decoration: none;
+   477→  font-weight: 700;
+   478→  font-size: 14.5px;
+   479→  border-bottom: 1px solid var(--line);
+   480→  padding-bottom: 3px;
+   481→  transition: border-color 0.2s, color 0.2s;
+   482→}
+   483→.link:hover {
+   484→  color: var(--red);
+   485→  border-color: var(--red);
+   486→}
+   487→.link b {
+   488→  color: var(--red);
+   489→}
+   490→
+   491→.hero-visual {
+   492→  grid-area: visual;
+   493→  justify-self: center;
+   494→  align-self: start;
+   495→  padding-top: 10px;
+   496→}
+   497→.photo-card {
+   498→  margin: 0;
+   499→  background: #f5f3ee;
+   500→  padding: 12px 12px 8px;
+   501→  border-radius: 10px;
+   502→  transform: rotate(2.4deg);
+   503→  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+   504→  transition: transform 0.35s cubic-bezier(0.2, 0.6, 0.2, 1);
+   505→  max-width: 340px;
+   506→}
+   507→.photo-card:hover {
+   508→  transform: rotate(0deg) scale(1.02);
+   509→}
+   510→.photo-card img {
+   511→  display: block;
+   512→  width: 100%;
+   513→  height: auto;
+   514→  border-radius: 6px;
+   515→  filter: saturate(0.92) contrast(1.04);
+   516→}
+   517→.photo-fb {
+   518→  width: 316px;
+   519→  height: 316px;
+   520→  border-radius: 6px;
+   521→  background: linear-gradient(135deg, #17171b, #0c0c0e 60%);
+   522→  color: var(--red);
+   523→  display: grid;
+   524→  place-items: center;
+   525→  font-size: 84px;
+   526→  letter-spacing: 0.04em;
+   527→}
+   528→.photo-card figcaption {
+   529→  text-align: center;
+   530→  padding: 8px 0 4px;
+   531→  color: #1a1a1a;
+   532→  font-size: 21px;
+   533→  font-weight: 600;
+   534→}
+   535→
+   536→.hero-right {
+   537→  grid-area: right;
+   538→  align-self: end;
+   539→  padding-bottom: 6px;
+   540→}
+   541→.tagline {
+   542→  display: flex;
+   543→  gap: 12px;
+   544→  align-items: flex-start;
+   545→  margin-bottom: 26px;
+   546→  padding-left: 4px;
+   547→}
+   548→.tagline .ast {
+   549→  flex: none;
+   550→  margin-top: 4px;
+   551→}
+   552→.tagline-tx {
+   553→  font-size: clamp(16px, 1.9vw, 20px);
+   554→  font-weight: 700;
+   555→  line-height: 1.45;
+   556→  color: var(--ink);
+   557→  white-space: pre-line;
+   558→}
+   559→.stats {
+   560→  display: flex;
+   561→  flex-direction: column;
+   562→  gap: 0;
+   563→  border-top: 1px solid var(--line);
+   564→}
+   565→.stat {
+   566→  display: flex;
+   567→  align-items: baseline;
+   568→  gap: 16px;
+   569→  padding: 14px 4px;
+   570→  border-bottom: 1px solid var(--line);
+   571→}
+   572→.stat .num-row {
+   573→  min-width: 86px;
+   574→  display: inline-flex;
+   575→  align-items: baseline;
+   576→  color: var(--ink);
+   577→}
+   578→.stat .n {
+   579→  font-family: var(--font-anton), sans-serif;
+   580→  font-size: 34px;
+   581→  line-height: 1;
+   582→}
+   583→.stat .n-small {
+   584→  color: var(--red);
+   585→  font-size: 20px;
+   586→  margin-left: 2px;
+   587→}
+   588→.stat .t {
+   589→  font-size: 13.5px;
+   590→  color: var(--mut);
+   591→  line-height: 1.45;
+   592→  display: flex;
+   593→  flex-direction: column;
+   594→}
+   595→.stat .t-sub {
+   596→  font-size: 11px;
+   597→  letter-spacing: 0.14em;
+   598→  text-transform: uppercase;
+   599→  color: var(--mut-2);
+   600→  margin-top: 3px;
+   601→}
+   602→.hero-strip {
+   603→  grid-area: strip;
+   604→  margin-top: 44px;
+   605→  padding-top: 16px;
+   606→  border-top: 1px solid var(--line);
+   607→  display: flex;
+   608→  align-items: center;
+   609→  justify-content: space-between;
+   610→  gap: 18px;
+   611→}
+   612→.hero-strip .label,
+   613→.label.mid {
+   614→  font-size: 11.5px;
+   615→  letter-spacing: 0.16em;
+   616→  text-transform: uppercase;
+   617→  color: var(--mut-2);
+   618→  font-weight: 600;
+   619→}
+   620→.hero-strip .label b {
+   621→  color: var(--red);
+   622→}
+   623→.play-link {
+   624→  display: inline-flex;
+   625→  align-items: center;
+   626→  gap: 10px;
+   627→  color: var(--ink);
+   628→  text-decoration: none;
+   629→  font-weight: 700;
+   630→  font-size: 13.5px;
+   631→}
+   632→.play-link em {
+   633→  font-style: normal;
+   634→  color: var(--red);
+   635→}
+   636→.play-link:hover em {
+   637→  text-decoration: underline;
+   638→}
+   639→.play-ic {
+   640→  width: 30px;
+   641→  height: 30px;
+   642→  border-radius: 50%;
+   643→  border: 1px solid var(--line);
+   644→  display: grid;
+   645→  place-items: center;
+   646→  color: var(--red);
+   647→  transition: border-color 0.2s, transform 0.2s;
+   648→}
+   649→.play-link:hover .play-ic {
+   650→  border-color: var(--red);
+   651→  transform: scale(1.08);
+   652→}
+   653→.play-ic svg {
+   654→  width: 9px;
+   655→  height: 11px;
+   656→}
+   657→
+   658→/* ---------- tabs ---------- */
+   659→.tabs {
+   660→  display: flex;
+   661→  gap: 10px;
+   662→  flex-wrap: wrap;
+   663→  margin-bottom: 30px;
+   664→}
+   665→.tab {
+   666→  background: transparent;
+   667→  border: 1px solid var(--line);
+   668→  color: var(--mut);
+   669→  border-radius: 999px;
+   670→  padding: 9px 18px;
+   671→  font-size: 13.5px;
+   672→  font-weight: 600;
+   673→  cursor: pointer;
+   674→  transition: all 0.2s;
+   675→  min-height: 40px;
+   676→}
+   677→.tab sup {
+   678→  color: var(--red);
+   679→  font-size: 10px;
+   680→  margin-left: 3px;
+   681→  font-weight: 800;
+   682→}
+   683→.tab:hover {
+   684→  color: var(--ink);
+   685→  border-color: rgba(255, 255, 255, 0.25);
+   686→}
+   687→.tab.is-active {
+   688→  background: var(--red);
+   689→  border-color: var(--red);
+   690→  color: #fff;
+   691→}
+   692→.tab.is-active sup {
+   693→  color: rgba(255, 255, 255, 0.85);
+   694→}
+   695→
+   696→/* ---------- kartu projek ---------- */
+   697→.work-grid {
+   698→  display: grid;
+   699→  grid-template-columns: repeat(3, 1fr);
+   700→  gap: 22px;
+   701→}
+   702→.card-wrap {
+   703→  position: relative;
+   704→  min-width: 0;
+   705→}
+   706→.card {
+   707→  display: flex;
+   708→  flex-direction: column;
+   709→  background: var(--panel);
+   710→  border: 1px solid var(--line);
+   711→  border-radius: 14px;
+   712→  overflow: hidden;
+   713→  text-decoration: none;
+   714→  color: var(--ink);
+   715→  height: 100%;
+   716→  transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.2, 1), border-color 0.3s, box-shadow 0.3s;
+   717→}
+   718→.card:hover {
+   719→  transform: translateY(-5px);
+   720→  border-color: rgba(255, 30, 45, 0.55);
+   721→  box-shadow: 0 18px 44px rgba(255, 30, 45, 0.1);
+   722→}
+   723→.thumb {
+   724→  position: relative;
+   725→  aspect-ratio: 16 / 10;
+   726→  background: #101013;
+   727→  overflow: hidden;
+   728→  border-bottom: 1px solid var(--line);
+   729→}
+   730→.thumb img {
+   731→  width: 100%;
+   732→  height: 100%;
+   733→  object-fit: cover;
+   734→  display: block;
+   735→  transition: transform 0.45s cubic-bezier(0.2, 0.6, 0.2, 1), filter 0.3s;
+   736→  filter: saturate(0.9);
+   737→}
+   738→.card:hover .thumb img {
+   739→  transform: scale(1.04);
+   740→  filter: saturate(1);
+   741→}
+   742→.thumb .tag {
+   743→  position: absolute;
+   744→  top: 12px;
+   745→  left: 12px;
+   746→  z-index: 2;
+   747→  background: rgba(10, 10, 10, 0.82);
+   748→  border: 1px solid rgba(255, 255, 255, 0.16);
+   749→  color: var(--ink);
+   750→  font-size: 10.5px;
+   751→  font-weight: 700;
+   752→  letter-spacing: 0.12em;
+   753→  text-transform: uppercase;
+   754→  border-radius: 999px;
+   755→  padding: 5px 11px;
+   756→  backdrop-filter: blur(6px);
+   757→}
+   758→.thumb-fb {
+   759→  width: 100%;
+   760→  height: 100%;
+   761→  display: flex;
+   762→  flex-direction: column;
+   763→  align-items: center;
+   764→  justify-content: center;
+   765→  gap: 8px;
+   766→  background:
+   767→    radial-gradient(120% 90% at 50% 10%, rgba(255, 30, 45, 0.12), transparent 55%),
+   768→    repeating-linear-gradient(0deg, transparent 0 23px, rgba(255, 255, 255, 0.03) 23px 24px),
+   769→    #101013;
+   770→}
+   771→.thumb-fb .font-display {
+   772→  font-size: clamp(22px, 2.4vw, 30px);
+   773→  letter-spacing: 0.03em;
+   774→  text-transform: uppercase;
+   775→  text-align: center;
+   776→  padding: 0 18px;
+   777→  color: var(--ink);
+   778→}
+   779→.thumb-fb-sub {
+   780→  font-family: var(--font-geist-mono), monospace;
+   781→  font-size: 11px;
+   782→  color: var(--red);
+   783→  letter-spacing: 0.14em;
+   784→  text-transform: uppercase;
+   785→}
+   786→.meta {
+   787→  display: flex;
+   788→  gap: 14px;
+   789→  padding: 16px 16px 18px;
+   790→  align-items: flex-start;
+   791→}
+   792→.meta .no {
+   793→  font-family: var(--font-geist-mono), monospace;
+   794→  color: var(--red);
+   795→  font-size: 12px;
+   796→  font-weight: 700;
+   797→  padding-top: 3px;
+   798→}
+   799→.meta .ttl {
+   800→  display: flex;
+   801→  flex-direction: column;
+   802→  gap: 6px;
+   803→  font-weight: 700;
+   804→  font-size: 16.5px;
+   805→  line-height: 1.3;
+   806→  min-width: 0;
+   807→}
+   808→.meta .ttl small {
+   809→  color: var(--mut-2);
+   810→  font-weight: 500;
+   811→  font-size: 12.5px;
+   812→  display: flex;
+   813→  align-items: center;
+   814→  gap: 8px;
+   815→  flex-wrap: wrap;
+   816→}
+   817→.lang-chip {
+   818→  font-family: var(--font-geist-mono), monospace;
+   819→  font-size: 10px;
+   820→  letter-spacing: 0.1em;
+   821→  text-transform: uppercase;
+   822→  color: var(--mut);
+   823→  border: 1px solid var(--line);
+   824→  border-radius: 999px;
+   825→  padding: 2px 8px;
+   826→}
+   827→.meta .hook {
+   828→  color: var(--mut);
+   829→  font-weight: 400;
+   830→  font-size: 13.5px;
+   831→  line-height: 1.6;
+   832→}
+   833→.meta .go {
+   834→  margin-left: auto;
+   835→  color: var(--mut-2);
+   836→  font-size: 17px;
+   837→  transition: color 0.2s, transform 0.2s;
+   838→}
+   839→.card:hover .go {
+   840→  color: var(--red);
+   841→  transform: translate(2px, -2px);
+   842→}
+   843→.card-gear {
+   844→  margin-left: auto;
+   845→  flex: none;
+   846→  width: 34px;
+   847→  height: 34px;
+   848→  border-radius: 8px;
+   849→  border: 1px solid var(--line);
+   850→  background: var(--panel-2);
+   851→  color: var(--mut);
+   852→  display: grid;
+   853→  place-items: center;
+   854→  cursor: pointer;
+   855→  transition: all 0.2s;
+   856→}
+   857→.card-gear:hover,
+   858→.card-gear[aria-expanded="true"] {
+   859→  color: var(--red);
+   860→  border-color: var(--red);
+   861→}
+   862→.add-row {
+   863→  margin-top: 26px;
+   864→}
+   865→.grid-note {
+   866→  margin-top: 26px;
+   867→  color: var(--mut-2);
+   868→  font-size: 13.5px;
+   869→}
+   870→
+   871→/* ---------- panel pengaturan kartu (Mode Edit) ---------- */
+   872→.card-settings {
+   873→  position: absolute;
+   874→  z-index: 30;
+   875→  top: 12px;
+   876→  right: 12px;
+   877→  width: min(320px, calc(100vw - 48px));
+   878→  background: rgba(12, 12, 14, 0.97);
+   879→  border: 1px solid rgba(255, 30, 45, 0.5);
+   880→  border-radius: 12px;
+   881→  padding: 14px;
+   882→  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+   883→  backdrop-filter: blur(10px);
+   884→}
+   885→.cs-head {
+   886→  display: flex;
+   887→  justify-content: space-between;
+   888→  align-items: center;
+   889→  margin-bottom: 10px;
+   890→  font-size: 12px;
+   891→  letter-spacing: 0.14em;
+   892→  text-transform: uppercase;
+   893→  color: var(--red);
+   894→  font-weight: 800;
+   895→}
+   896→.cs-head button {
+   897→  background: none;
+   898→  border: none;
+   899→  color: var(--mut);
+   900→  font-size: 20px;
+   901→  cursor: pointer;
+   902→  line-height: 1;
+   903→}
+   904→.cs-field {
+   905→  display: block;
+   906→  margin-bottom: 10px;
+   907→}
+   908→.cs-field span {
+   909→  display: block;
+   910→  font-size: 11px;
+   911→  color: var(--mut-2);
+   912→  margin-bottom: 4px;
+   913→  letter-spacing: 0.06em;
+   914→  text-transform: uppercase;
+   915→  font-weight: 600;
+   916→}
+   917→.cs-field input,
+   918→.cs-field select {
+   919→  width: 100%;
+   920→  background: #0a0a0c;
+   921→  border: 1px solid var(--line);
+   922→  color: var(--ink);
+   923→  border-radius: 8px;
+   924→  padding: 8px 10px;
+   925→  font-size: 13px;
+   926→  outline: none;
+   927→}
+   928→.cs-field input:focus,
+   929→.cs-field select:focus {
+   930→  border-color: var(--red);
+   931→}
+   932→.cs-delete {
+   933→  width: 100%;
+   934→  margin-top: 4px;
+   935→  background: transparent;
+   936→  border: 1px solid rgba(255, 30, 45, 0.5);
+   937→  color: var(--red);
+   938→  border-radius: 8px;
+   939→  padding: 8px;
+   940→  font-size: 13px;
+   941→  font-weight: 700;
+   942→  cursor: pointer;
+   943→}
+   944→.cs-delete:hover {
+   945→  background: var(--red-dim);
+   946→}
+   947→
+   948→/* ---------- tools ---------- */
+   949→.tools {
+   950→  margin-top: 48px;
+   951→  display: flex;
+   952→  gap: 24px;
+   953→  align-items: flex-start;
+   954→}
+   955→.tools .label b {
+   956→  text-transform: none;
+   957→  letter-spacing: 0.02em;
+   958→  font-size: 14px;
+   959→  color: var(--ink);
+   960→}
+   961→.tools ul {
+   962→  display: flex;
+   963→  flex-wrap: wrap;
+   964→  gap: 10px;
+   965→  list-style: none;
+   966→  padding: 0;
+   967→  margin: 0;
+   968→}
+   969→.tools li {
+   970→  font-family: var(--font-geist-mono), monospace;
+   971→  font-size: 12.5px;
+   972→  color: var(--mut);
+   973→  border: 1px solid var(--line);
+   974→  border-radius: 999px;
+   975→  padding: 7px 14px;
+   976→  letter-spacing: 0.04em;
+   977→}
+   978→
+   979→/* ---------- kontak ---------- */
+   980→.contact {
+   981→  display: grid;
+   982→  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+   983→  gap: 44px;
+   984→  align-items: start;
+   985→}
+   986→.contact .lede {
+   987→  margin-top: 18px;
+   988→  color: var(--mut);
+   989→  line-height: 1.75;
+   990→  font-size: 15.5px;
+   991→  max-width: 52ch;
+   992→}
+   993→.circle-cta {
+   994→  margin-top: 30px;
+   995→  display: inline-flex;
+   996→  align-items: center;
+   997→  gap: 14px;
+   998→  color: var(--ink);
+   999→  text-decoration: none;
+  1000→  font-weight: 700;
+  1001→  font-size: 15px;
+  1002→}
+  1003→.circle-cta .c {
+  1004→  width: 58px;
+  1005→  height: 58px;
+  1006→  border-radius: 50%;
+  1007→  border: 1px solid var(--line);
+  1008→  display: grid;
+  1009→  place-items: center;
+  1010→  transition: all 0.25s;
+  1011→}
+  1012→.circle-cta:hover .c {
+  1013→  background: var(--red);
+  1014→  border-color: var(--red);
+  1015→  color: #fff;
+  1016→  transform: rotate(8deg) scale(1.05);
+  1017→}
+  1018→.contact-list {
+  1019→  display: flex;
+  1020→  flex-direction: column;
+  1021→}
+  1022→.ci {
+  1023→  display: flex;
+  1024→  align-items: center;
+  1025→  gap: 16px;
+  1026→  padding: 18px 6px;
+  1027→  border-bottom: 1px solid var(--line);
+  1028→  color: var(--ink);
+  1029→  text-decoration: none;
+  1030→  transition: background 0.2s, padding 0.2s;
+  1031→}
+  1032→.ci:first-child {
+  1033→  border-top: 1px solid var(--line);
+  1034→}
+  1035→.ci:hover {
+  1036→  background: rgba(255, 255, 255, 0.03);
+  1037→  padding-left: 14px;
+  1038→}
+  1039→.ci .ico {
+  1040→  width: 42px;
+  1041→  height: 42px;
+  1042→  flex: none;
+  1043→  border-radius: 10px;
+  1044→  border: 1px solid var(--line);
+  1045→  display: grid;
+  1046→  place-items: center;
+  1047→  color: var(--red);
+  1048→}
+  1049→.ci .ct {
+  1050→  display: flex;
+  1051→  flex-direction: column;
+  1052→  gap: 3px;
+  1053→  min-width: 0;
+  1054→  font-weight: 700;
+  1055→  font-size: 15px;
+  1056→}
+  1057→.ci .ct small {
+  1058→  color: var(--mut-2);
+  1059→  font-weight: 500;
+  1060→  font-size: 11.5px;
+  1061→  letter-spacing: 0.1em;
+  1062→  text-transform: uppercase;
+  1063→}
+  1064→.ci .ca {
+  1065→  margin-left: auto;
+  1066→  color: var(--mut-2);
+  1067→  transition: color 0.2s, transform 0.2s;
+  1068→}
+  1069→.ci:hover .ca {
+  1070→  color: var(--red);
+  1071→  transform: translate(2px, -2px);
+  1072→}
+  1073→.support {
+  1074→  margin-top: 72px;
+  1075→  padding: 44px 36px;
+  1076→  border: 1px solid var(--line);
+  1077→  border-radius: 18px;
+  1078→  background: linear-gradient(160deg, rgba(255, 30, 45, 0.08), transparent 45%), var(--panel);
+  1079→  display: flex;
+  1080→  align-items: center;
+  1081→  justify-content: space-between;
+  1082→  gap: 30px;
+  1083→  flex-wrap: wrap;
+  1084→}
+  1085→.sp-big {
+  1086→  font-size: clamp(40px, 5.4vw, 72px);
+  1087→  line-height: 0.95;
+  1088→  text-transform: uppercase;
+  1089→  white-space: pre-line;
+  1090→  margin: 0;
+  1091→}
+  1092→.support p:not(.sp-big) {
+  1093→  color: var(--mut);
+  1094→  max-width: 44ch;
+  1095→  line-height: 1.7;
+  1096→  font-size: 14.5px;
+  1097→  margin: 0;
+  1098→}
+  1099→
+  1100→/* ---------- footer ---------- */
+  1101→.site-footer {
+  1102→  border-top: 1px solid var(--line);
+  1103→  margin-top: 90px;
+  1104→  position: relative;
+  1105→  z-index: 1;
+  1106→  background: #050505;
+  1107→}
+  1108→.site-footer .ft {
+  1109→  max-width: var(--w);
+  1110→  margin: 0 auto;
+  1111→  padding: 40px 28px 46px;
+  1112→  display: flex;
+  1113→  align-items: flex-end;
+  1114→  justify-content: space-between;
+  1115→  gap: 28px;
+  1116→  flex-wrap: wrap;
+  1117→}
+  1118→.ft-mega {
+  1119→  font-size: clamp(56px, 9vw, 130px);
+  1120→  line-height: 0.8;
+  1121→  color: transparent;
+  1122→  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
+  1123→  user-select: none;
+  1124→}
+  1125→.ft-links {
+  1126→  display: flex;
+  1127→  gap: 20px;
+  1128→  flex-wrap: wrap;
+  1129→}
+  1130→.ft-links a,
+  1131→.ft-links button {
+  1132→  color: var(--mut);
+  1133→  text-decoration: none;
+  1134→  font-size: 13px;
+  1135→  font-weight: 600;
+  1136→  letter-spacing: 0.1em;
+  1137→  text-transform: uppercase;
+  1138→  background: none;
+  1139→  border: none;
+  1140→  cursor: pointer;
+  1141→  padding: 0;
+  1142→  transition: color 0.2s;
+  1143→}
+  1144→.ft-links a:hover,
+  1145→.ft-links button:hover {
+  1146→  color: var(--red);
+  1147→}
+  1148→.ft-copy {
+  1149→  color: var(--mut-2);
+  1150→  font-size: 12.5px;
+  1151→  max-width: 52ch;
+  1152→  line-height: 1.7;
+  1153→  margin: 0;
+  1154→}
+  1155→
+  1156→/* ---------- reveal animasi ---------- */
+  1157→.rv {
+  1158→  opacity: 0;
+  1159→  transform: translateY(22px);
+  1160→  transition: opacity 0.7s cubic-bezier(0.2, 0.6, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.6, 0.2, 1);
+  1161→}
+  1162→.rv.is-in {
+  1163→  opacity: 1;
+  1164→  transform: none;
+  1165→}
+  1166→html.force-reveal .rv {
+  1167→  opacity: 1 !important;
+  1168→  transform: none !important;
+  1169→}
+  1170→
+  1171→/* ---------- mode edit ---------- */
+  1172→.ed-on {
+  1173→  outline: 1.5px dashed rgba(255, 30, 45, 0.65);
+  1174→  outline-offset: 4px;
+  1175→  border-radius: 4px;
+  1176→  cursor: text;
+  1177→  min-width: 1.5ch;
+  1178→  display: inline-block;
+  1179→  /* innerText mematuhi text-transform; matikan saat edit agar nilai
+  1180→     tersimpan persis seperti yang diketik (huruf asli, bukan kapital CSS).
+  1181→     Fix v2. */
+  1182→  text-transform: none !important;
+  1183→}
+  1184→.ed-on:focus {
+  1185→  outline: 1.5px solid var(--red);
+  1186→  background: rgba(255, 30, 45, 0.08);
+  1187→}
+  1188→.hero-name .ed-on {
+  1189→  display: inline;
+  1190→}
+  1191→.editbar {
+  1192→  position: fixed;
+  1193→  bottom: 16px;
+  1194→  left: 50%;
+  1195→  transform: translateX(-50%);
+  1196→  z-index: 60;
+  1197→  display: flex;
+  1198→  align-items: center;
+  1199→  gap: 8px;
+  1200→  background: rgba(14, 14, 16, 0.92);
+  1201→  border: 1px solid var(--line);
+  1202→  border-radius: 999px;
+  1203→  padding: 8px 12px;
+  1204→  backdrop-filter: blur(12px);
+  1205→  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  1206→  max-width: calc(100vw - 24px);
+  1207→  flex-wrap: wrap;
+  1208→}
+  1209→.eb-btn {
+  1210→  background: transparent;
+  1211→  border: 1px solid var(--line);
+  1212→  color: var(--mut);
+  1213→  border-radius: 999px;
+  1214→  padding: 8px 16px;
+  1215→  font-size: 12.5px;
+  1216→  font-weight: 700;
+  1217→  cursor: pointer;
+  1218→  display: inline-flex;
+  1219→  align-items: center;
+  1220→  gap: 7px;
+  1221→  min-height: 34px;
+  1222→  transition: all 0.2s;
+  1223→  white-space: nowrap;
+  1224→}
+  1225→.eb-btn:hover {
+  1226→  color: var(--ink);
+  1227→  border-color: rgba(255, 255, 255, 0.3);
+  1228→}
+  1229→.eb-main {
+  1230→  background: var(--ink);
+  1231→  border-color: var(--ink);
+  1232→  color: #0a0a0a;
+  1233→}
+  1234→.eb-main:hover {
+  1235→  background: #fff;
+  1236→  border-color: #fff;
+  1237→  color: #0a0a0a;
+  1238→}
+  1239→.eb-main.is-on {
+  1240→  background: var(--red);
+  1241→  border-color: var(--red);
+  1242→  color: #fff;
+  1243→}
+  1244→.eb-danger:hover {
+  1245→  color: var(--red);
+  1246→  border-color: var(--red);
+  1247→}
+  1248→.eb-status {
+  1249→  font-size: 11.5px;
+  1250→  color: var(--mut-2);
+  1251→  padding: 0 6px;
+  1252→  letter-spacing: 0.04em;
+  1253→}
+  1254→
+  1255→/* ---------- motion off ---------- */
+  1256→html.no-motion .rv {
+  1257→  opacity: 1 !important;
+  1258→  transform: none !important;
+  1259→  transition: none !important;
+  1260→}
+  1261→html.no-motion *,
+  1262→html.no-motion *::before,
+  1263→html.no-motion *::after {
+  1264→  animation: none !important;
+  1265→  transition: none !important;
+  1266→  scroll-behavior: auto !important;
+  1267→}
+  1268→
+  1269→/* ---------- responsif ---------- */
+  1270→@media (max-width: 1020px) {
+  1271→  .work-grid {
+  1272→    grid-template-columns: repeat(2, 1fr);
+  1273→  }
+  1274→  .hero {
+  1275→    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  1276→  }
+  1277→}
+  1278→@media (max-width: 820px) {
+  1279→  .nav {
+  1280→    display: none;
+  1281→  }
+  1282→  .hero {
+  1283→    grid-template-columns: 1fr;
+  1284→    grid-template-areas:
+  1285→      "mega"
+  1286→      "left"
+  1287→      "visual"
+  1288→      "right"
+  1289→      "strip";
+  1290→    padding-top: 120px;
+  1291→  }
+  1292→  .hero-visual {
+  1293→    justify-self: start;
+  1294→  }
+  1295→  .photo-card {
+  1296→    max-width: 280px;
+  1297→  }
+  1298→  .photo-fb {
+  1299→    width: 256px;
+  1300→    height: 256px;
+  1301→    font-size: 64px;
+  1302→  }
+  1303→  .section {
+  1304→    padding: 78px 22px 30px;
+  1305→  }
+  1306→  .section-head {
+  1307→    flex-direction: column;
+  1308→    align-items: flex-start;
+  1309→    gap: 10px;
+  1310→  }
+  1311→  .contact {
+  1312→    grid-template-columns: 1fr;
+  1313→    gap: 30px;
+  1314→  }
+  1315→  .hero-strip {
+  1316→    flex-direction: column;
+  1317→    align-items: flex-start;
+  1318→    gap: 10px;
+  1319→  }
+  1320→  .stat .n {
+  1321→    font-size: 28px;
+  1322→  }
+  1323→}
+  1324→@media (max-width: 620px) {
+  1325→  .work-grid {
+  1326→    grid-template-columns: 1fr;
+  1327→  }
+  1328→  .tools {
+  1329→    flex-direction: column;
+  1330→  }
+  1331→  .site-header .bar {
+  1332→    padding: 12px 18px;
+  1333→  }
+  1334→  .hero,
+  1335→  .section {
+  1336→    padding-left: 18px;
+  1337→    padding-right: 18px;
+  1338→  }
+  1339→  .guides {
+  1340→    padding: 0 18px;
+  1341→  }
+  1342→  .motion-toggle .tx {
+  1343→    display: none;
+  1344→  }
+  1345→  .editbar {
+  1346→    gap: 6px;
+  1347→    padding: 7px 10px;
+  1348→  }
+  1349→  .eb-status {
+  1350→    display: none;
+  1351→  }
+  1352→}
+  1353→@media (prefers-reduced-motion: reduce) {
+  1354→  .rv {
+  1355→    opacity: 1;
+  1356→    transform: none;
+  1357→    transition: none;
+  1358→  }
+  1359→  .hero-name .typed::after {
+  1360→    animation: none;
+  1361→  }
+  1362→}
+  1363→

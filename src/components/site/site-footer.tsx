@@ -2,9 +2,10 @@
 
 import { useSite } from "./site-context";
 import { Ed } from "./ed";
+import { SiteClock } from "./site-clock";
 
 export function SiteFooter() {
-  const { content, editing, setEditing } = useSite();
+  const { content, editing, setEditing, motion } = useSite();
 
   return (
     <footer className="site-footer">
@@ -28,16 +29,27 @@ export function SiteFooter() {
               </a>
             ))}
             <button type="button" onClick={() => setEditing(true)}>
-              Mode Edit
+              Edit Mode
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                window.scrollTo({ top: 0, behavior: motion ? "smooth" : "auto" })
+              }
+            >
+              Back to top &uarr;
             </button>
           </div>
           <p className="ft-copy" style={{ marginTop: 12 }}>
             <Ed p="footer.note" />
           </p>
         </div>
-        <p className="ft-copy">
-          <Ed p="footer.copy" />
-        </p>
+        <div className="ft-meta">
+          <SiteClock />
+          <p className="ft-copy">
+            <Ed p="footer.copy" />
+          </p>
+        </div>
       </div>
     </footer>
   );

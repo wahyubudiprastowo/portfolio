@@ -4,6 +4,32 @@ Website ini di-desain agar bisa langsung di-upload ke **GitHub Pages** (sama sep
 situs referensi popolab-tw.github.io). Semua langkah di bawah bisa dilakukan dari
 browser, tanpa install apapun.
 
+> Isi website memakai **bahasa Inggris** (gaya POPOLAB), panduan ini tetap
+> bahasa Indonesia karena untuk pemakaian pribadi Anda.
+
+---
+
+## Fitur motion & efek dinamis (v2)
+
+Situs kini punya efek lengkap bergaya POPOLAB — semuanya otomatis dan bisa dimatikan:
+
+| Efek | Detail |
+| --- | --- |
+| **Custom cursor** | Titik merah + ring yang mengikuti mouse; membesar di link; berubah jadi bulatan merah "OPEN" di atas kartu projek. Nonaktif di perangkat sentuh. |
+| **Marquee ticker** | Pita merah miring raksasa (Cloud Security ✦ DevSecOps ✦ Azure ✦ …) setelah hero + pita outline sebelum kontak. Berhenti saat di-hover. |
+| **Floating tags** | Chip teknologi (Azure, Wazuh, Python…) mengambang di sekitar foto — bisa diedit langsung di Mode Edit. |
+| **Magnetic buttons** | Tombol CTA tertarik mengikuti kursor. |
+| **Parallax** | Teks raksasa WAHYU bergeser & memudar saat scroll. |
+| **3D tilt** | Kartu foto polaroid miring mengikuti mouse. |
+| **Spotlight kartu** | Cahaya merah mengikuti pointer di permukaan kartu projek. |
+| **Scramble nav** | Teks menu work/contact "berantakan" lalu normal saat hover. |
+| **Intro stagger** | Bagian hero muncul berurutan saat halaman dibuka. |
+| **Scroll progress** | Garis merah tipis di atas = sisa halaman. |
+| **Count-up + jam live** | Statistik berhitung naik; jam Jakarta (WIB) berdetak di footer. |
+
+Semua efek mati bila tombol **Motion → Off** (tersimpan di browser) atau bila OS
+user mengaktifkan *reduced motion*.
+
 ---
 
 ## Yang perlu dipahami dulu (2 menit)
@@ -11,12 +37,12 @@ browser, tanpa install apapun.
 | Bagian | Fungsi |
 | --- | --- |
 | `src/` | Kode tampilan website (tidak perlu diubah untuk ganti isi) |
-| `public/content.json` | **SELURUH ISI WEBSITE** — teks, projek, statistik, kontak |
-| Mode Edit (tombol di website) | Ubah isi langsung di browser, tanpa koding |
+| `public/content.json` | **SELURUH ISI WEBSITE** — teks, projek, statistik, kontak, ticker, floating tags |
+| Edit Mode (tombol di website) | Ubah isi langsung di browser, tanpa koding |
 | `.github/workflows/deploy-pages.yml` | Otomatis membangun & menayangkan website setiap kali repo di-update |
 
-**Alur kerja yang disarankan:** edit isi lewat Mode Edit di browser → klik
-**Ekspor** (mengunduh `content.json`) → ganti file `public/content.json` di GitHub
+**Alur kerja yang disarankan:** edit isi lewat Edit Mode di browser → klik
+**Export** (mengunduh `content.json`) → ganti file `public/content.json` di GitHub
 → website otomatis ter-update untuk semua pengunjung.
 
 ---
@@ -68,19 +94,21 @@ Lalu lanjut ke langkah 6 di atas (Settings → Pages → Source: **GitHub Action
 
 ## BAGIAN 2 — Mengedit isi website
 
-### Opsi 1: Mode Edit (tanpa koding, direkomendasikan)
+### Opsi 1: Edit Mode (tanpa koding, direkomendasikan)
 
-1. Buka website Anda, klik tombol **Mode Edit** (di header kanan atas atau
+1. Buka website Anda, klik tombol **Edit Mode** (di header kanan atas atau
    toolbar bawah).
-2. **Klik teks mana pun** untuk mengubahnya: nama, deskripsi, statistik, teks
-   kontak, catatan footer, semuanya bisa langsung diketik ulang.
+2. **Klik teks mana pun** untuk mengubahnya: nama, deskripsi, statistik, chip
+   teknologi yang mengambang, teks kontak, catatan footer, semuanya bisa
+   langsung diketik ulang. Efek mengambang otomatis berhenti saat mode edit
+   aktif supaya teks mudah diklik.
 3. Untuk kartu projek: klik ikon **gerigi** di pojok kartu. Di situ Anda bisa
    mengubah judul, subjudul, hook, URL, bahasa, label, kategori, gambar, atau
    **menghapus** kartu.
-4. Tombol **+ Tambah projek** menambah kartu baru di bagian Karya.
+4. Tombol **+ Add project** menambah kartu baru di bagian Work.
 5. Perubahan otomatis tersimpan di **browser Anda** (localStorage).
-   Tombol **Reset** membuang semua perubahan; **Impor** memuat `content.json`.
-6. Klik **Ekspor** → file `content.json` terunduh. Ini versi final isi website.
+   Tombol **Reset** membuang semua perubahan; **Import** memuat `content.json`.
+6. Klik **Export** → file `content.json` terunduh. Ini versi final isi website.
 7. Publikasikan: buka repo GitHub → `public/content.json` → ikon **pensil**
    (Edit) → hapus isinya, paste isi file hasil ekspor (buka file
    `content.json` dengan Notepad, salin semuanya) → **Commit changes**.
@@ -99,8 +127,9 @@ Struktur singkat:
 
 ```json
 {
-  "hero": { "name": "Wahyu Budi Prastowo", "desc": "..." },
-  "stats": [ { "n": "10", "small": "+", "t": "Tahun pengalaman IT" } ],
+  "hero": { "name": "Wahyu Budi Prastowo", "desc": "...", "floatTags": ["Azure", "Wazuh"] },
+  "ticker": { "words": ["Cloud Security", "DevSecOps", "Azure"] },
+  "stats": [ { "n": "10", "small": "+", "t": "Years in IT" } ],
   "projects": [ { "title": "Agentic AI SOC", "url": "https://github.com/..." } ],
   "contact": { "items": [ ... ] }
 }
@@ -113,7 +142,7 @@ Struktur singkat:
 Field berikut sengaja dikosongkan karena datanya tidak ada di GitHub profil
 Anda. Isi lewat Mode Edit lalu publikasikan:
 
-1. **Email** (kartu kontak ke-3) — masih `Isi lewat Mode Edit`, isi juga
+1. **Email** (kartu kontak ke-3) — masih `Fill in via Edit Mode`, isi juga
    alamat `href`-nya di `content.json` (ganti `"#"` menjadi `mailto:nama@email.com`).
 2. **LinkedIn** (kartu kontak ke-4) — sama, isi URL profil LinkedIn Anda.
 3. Deskripsi repo yang belum punya deskripsi di GitHub (RTFM-DocumentLabs,

@@ -12,20 +12,21 @@ interface EdProps {
   tag?: keyof React.JSX.IntrinsicElements;
   style?: React.CSSProperties;
   ariaLabel?: string;
+  id?: string;
 }
 
 /**
  * Teks yang otomatis bisa diedit saat Mode Edit aktif.
  * Saat non-edit, render teks biasa.
  */
-export function Ed({ p, className, tag = "span", style, ariaLabel }: EdProps) {
+export function Ed({ p, className, tag = "span", style, ariaLabel, id }: EdProps) {
   const { content, editing, setPath } = useSite();
   const val = String(getByPath(content, p) ?? "");
   const T = tag as "span";
 
   if (!editing) {
     return (
-      <T className={className} style={style} aria-label={ariaLabel}>
+      <T className={className} style={style} aria-label={ariaLabel} id={id}>
         {val}
       </T>
     );
@@ -34,11 +35,12 @@ export function Ed({ p, className, tag = "span", style, ariaLabel }: EdProps) {
     <T
       className={cn(className, "ed-on")}
       style={style}
+      id={id}
       contentEditable
       suppressContentEditableWarning
       spellCheck={false}
       data-p={p}
-      aria-label={ariaLabel ?? `Edit ${p}`}
+      aria-label={ariaLabel ?? `Edit text: ${p}`}
       onBlur={(e: React.FocusEvent<HTMLElement>) =>
         setPath(p, e.currentTarget.innerText.replace(/\u00a0/g, " "))
       }

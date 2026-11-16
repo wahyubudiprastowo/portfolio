@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useSite } from "./site-context";
 import { Ed } from "./ed";
 import { Ast } from "./ico";
+import { cn } from "@/lib/utils";
 
-/** Angka statistik dengan animasi count-up saat terlihat. */
+/** Statistic number with a count-up animation once visible. */
 function CountNum({ target }: { target: string }) {
   const { motion, mounted } = useSite();
   const ref = useRef<HTMLSpanElement>(null);
@@ -56,8 +57,8 @@ export function Hero() {
   const animate = mounted && motion && !editing;
   const [typed, setTyped] = useState(full);
 
-  // Efek ketik sederhana untuk nama; teks sepenuhnya dikendalikan state
-  // agar aman dari re-render di tengah animasi.
+  // Typewriter effect for the name; text is fully state-driven so it is
+  // safe from re-renders in the middle of the animation.
   useEffect(() => {
     if (!animate) {
       const id = requestAnimationFrame(() => setTyped(full));
@@ -72,27 +73,67 @@ export function Hero() {
     return () => clearInterval(iv);
   }, [full, animate]);
 
+  // Giant background word drifts sideways as the page scrolls (parallax).
+  const megaRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!mounted || !motion || editing) return;
+    const el = megaRef.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const y = window.scrollY;
+      el.style.transform = `translate3d(${Math.min(y * 0.16, 240).toFixed(1)}px, 0, 0)`;
+      el.style.opacity = String(Math.max(0.35, 1 - y / 1100));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [mounted, motion, editing]);
+
+  // 3D tilt for the polaroid photo card.
+  const figRef = useRef<HTMLElement>(null);
+  const tiltActive = mounted && motion && !editing;
+  const onTilt = (e: React.MouseEvent) => {
+    if (!tiltActive || !figRef.current) return;
+    const el = figRef.current;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(700px) rotateX(${(-py * 7).toFixed(2)}deg) rotateY(${(px * 7).toFixed(2)}deg) rotate(2.4deg) scale(1.03)`;
+  };
+  const onTiltEnd = () => {
+    if (figRef.current) figRef.current.style.transform = "";
+  };
+
   const c = content;
   const isTyping = typed.length < full.length;
 
   return (
     <section className="hero" aria-labelledby="hero-name" id="top">
-      <p className="mega font-display" aria-hidden="true">
+      <p className="mega font-display" aria-hidden="true" ref={megaRef}>
         {c.brand}
       </p>
 
       <div className="hero-left">
-        <span className="hello">
+        <span className="hello intro d1">
           <Ed p="hero.hello" />
         </span>
-        <h1 className="hero-name" id="hero-name">
+        <h1 className="hero-name intro d2" id="hero-name">
           <span className="typed font-display">{typed}</span>
-          {isTyping ? <span className="r font-display">.</span> : null}
-          <Ed p="hero.dot" className="r font-display" ariaLabel="titik" />
+          {!isTyping ? (
+            <Ed p="hero.dot" className="r font-display" ariaLabel="dot" />
+          ) : null}
         </h1>
-        <Ed p="hero.role" tag="p" className="hero-role" />
-        <Ed p="hero.desc" tag="p" className="hero-desc" />
-        <div className="hero-cta">
+        <Ed p="hero.role" tag="p" className="hero-role intro d3" />
+        <Ed p="hero.desc" tag="p" className="hero-desc intro d4" />
+        <div className="hero-cta intro d5">
           <a
             className="btn btn-red"
             href="#work"
@@ -114,8 +155,13 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="hero-visual">
-        <figure className="photo-card">
+      <div className={cn("hero-visual intro d3", editing && "no-float")}>
+        <figure
+          className="photo-card"
+          ref={figRef as React.RefObject<HTMLElement>}
+          onMouseMove={onTilt}
+          onMouseLeave={onTiltEnd}
+        >
           {photoErr ? (
             <div className="photo-fb font-display" role="img" aria-label={c.hero.photoAlt}>
               WB
@@ -135,16 +181,25 @@ export function Hero() {
             <Ed p="hero.photoCaption" />
           </figcaption>
         </figure>
+
+        {/* Floating tech chips orbiting the photo (POPOLAB-style). */}
+        <div className="float-tags" aria-hidden={!editing}>
+          {c.hero.floatTags.map((tag, i) => (
+            <span className="float-tag" key={`ft-${i}`} style={{ ["--d" as string]: `${i * 0.7}s`, ["--tilt" as string]: `${(i % 2 === 0 ? -2.5 : 2.5) * (1 + (i % 3) * 0.6)}deg` }}>
+              <Ed p={`hero.floatTags.${i}`} />
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="hero-right">
-        <div className="tagline">
+        <div className="tagline intro d4">
           <span className="ast" aria-hidden="true">
             <Ast />
           </span>
           <Ed p="hero.tagline" tag="span" className="tagline-tx" />
         </div>
-        <div className="stats">
+        <div className="stats intro d5">
           {c.stats.map((st, i) => (
             <div className="stat" key={`stat-${i}`}>
               <span className="num-row">
@@ -160,7 +215,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="hero-strip">
+      <div className="hero-strip intro d6">
         <a
           className="play-link"
           href={c.hero.stripLeftHref}

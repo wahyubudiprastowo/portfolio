@@ -1,9 +1,10 @@
 // ============================================================
-// Sistem konten website portfolio Wahyu Budi Prastowo.
-// SEMUA teks yang tampil di website hidup di objek SiteContent.
-// File publik yang jadi sumber utama saat live: public/content.json
-// (bisa diganti dari tombol "Ekspor" di Mode Edit, atau diedit
-// langsung di GitHub tanpa koding).
+// Website content system for the Wahyu Budi Prastowo portfolio.
+// EVERY piece of text shown on the website lives in SiteContent.
+// The public source of truth when live: public/content.json
+// (replace it via the "Export" button in Edit Mode, or edit it
+// directly on GitHub without any coding).
+// Site language: English.
 // ============================================================
 
 export interface StatItem {
@@ -63,8 +64,12 @@ export interface SiteContent {
     stripLeftHref: string;
     stripMid: string;
     stripRight: string;
+    /** Floating chips orbiting the photo (POPOLAB-style). */
+    floatTags: string[];
   };
   stats: StatItem[];
+  /** Giant scrolling ticker bands between sections. */
+  ticker: { words: string[] };
   work: {
     num: string;
     label: string;
@@ -103,7 +108,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   meta: {
     title: "Wahyu Budi Prastowo — IT Infrastructure · Cloud Security · Azure",
     description:
-      "Portfolio Wahyu Budi Prastowo: projek open source di bidang cloud security, DevSecOps, infrastruktur Azure, dan aplikasi edukasi.",
+      "Portfolio of Wahyu Budi Prastowo — open-source projects in cloud security, DevSecOps, Azure infrastructure and educational apps. Every text on this site is editable via Edit Mode.",
   },
   brand: "WAHYU",
   hero: {
@@ -111,49 +116,62 @@ export const DEFAULT_CONTENT: SiteContent = {
     name: "Wahyu Budi Prastowo",
     dot: ".",
     role: "IT Infrastructure Specialist\nCloud Security · Azure · DevSecOps",
-    desc: "Lebih dari 10 tahun merancang infrastruktur yang aman, scalable, dan high-performance — dari Azure dan Microsoft 365 sampai Security Operations. Suka otomasi, minim kerja manual berulang.",
-    ctaPrimary: "Lihat Projek",
+    desc: "10+ years designing infrastructure that is secure, scalable and high-performance — from Azure and Microsoft 365 to Security Operations. Big on automation, allergic to repetitive manual work.",
+    ctaPrimary: "View projects",
     ctaSecondary: "GitHub",
     ctaSecondaryHref: GH,
-    tagline: "Setiap sistem,\ndibangun di atas keamanan.",
+    tagline: "Every system,\nbuilt on security.",
     photoUrl: "https://avatars.githubusercontent.com/wahyubudiprastowo?s=640",
     photoCaption: "Wahyu B.P.",
-    photoAlt: "Foto profil Wahyu Budi Prastowo dari GitHub",
-    stripLeft: "Projek unggulan: AgenticAiSOC",
+    photoAlt: "GitHub profile photo of Wahyu Budi Prastowo",
+    stripLeft: "Featured build: AgenticAiSOC",
     stripLeftHref: `${GH}/AgenticAiSOC`,
-    stripMid: "Scroll ke bawah",
+    stripMid: "Scroll down",
     stripRight: "Open source / GitHub",
+    floatTags: ["Azure", "Wazuh", "Python", "Docker", "Microsoft 365", "KQL"],
   },
   stats: [
-    { n: "10", small: "+", t: "Tahun pengalaman IT", sub: "Infrastructure & Cloud" },
-    { n: "10", small: "", t: "Repositori publik", sub: "Open source" },
-    { n: "17", small: "", t: "Kategori deteksi di AgenticAiSOC", sub: "Detection categories" },
+    { n: "10", small: "+", t: "Years in IT", sub: "Infrastructure & Cloud" },
+    { n: "10", small: "", t: "Public repositories", sub: "Open source" },
+    { n: "17", small: "", t: "Detection categories in AgenticAiSOC", sub: "Detection categories" },
   ],
+  ticker: {
+    words: [
+      "Cloud Security",
+      "DevSecOps",
+      "Azure",
+      "Microsoft 365",
+      "Python",
+      "Automation",
+      "Open Source",
+      "Zero Trust",
+    ],
+  },
   work: {
     num: "01",
     label: "Selected work",
     titleEn: "Work that ships.",
-    titleSub: "Projek yang jalan",
-    aside: "10 projek · semua open source",
-    note: "Klik kartu untuk membuka repositorinya di GitHub — README tiap projek berisi cara pakai dan arsitekturnya.",
+    titleSub: "Projects that actually run in production",
+    aside: "10 projects · all open source",
+    note: "Click a card to open its repository on GitHub — every README covers usage and architecture.",
     tabs: [
-      { id: "all", label: "Semua" },
-      { id: "security", label: "Keamanan" },
-      { id: "infra", label: "Infra & Otomasi" },
-      { id: "apps", label: "Aplikasi" },
-      { id: "other", label: "Lainnya" },
+      { id: "all", label: "All" },
+      { id: "security", label: "Security" },
+      { id: "infra", label: "Infra & Automation" },
+      { id: "apps", label: "Apps" },
+      { id: "other", label: "Others" },
     ],
     toolsLabel: "Built with",
-    toolsLabelSub: "Tools yang saya pakai",
+    toolsLabelSub: "Tools I use every day",
     tools: ["Azure", "Microsoft 365", "Docker", "Python", "TypeScript", "Wazuh", "React", "GitHub Actions"],
-    addBtn: "Tambah projek",
+    addBtn: "Add project",
   },
   projects: [
     {
       id: "agenticaisoc",
       title: "Agentic AI SOC",
-      small: "Agentic AI · 17 kategori deteksi / Python",
-      hook: "SOC full-stack: Wazuh, Defender XDR, threat intel, orkestrator Hermes, dan memori Qdrant dalam satu alur.",
+      small: "Agentic AI · 17 detection categories / Python",
+      hook: "Full-stack SOC: Wazuh, Defender XDR, threat intel, the Hermes orchestrator and Qdrant memory in one pipeline.",
       url: `${GH}/AgenticAiSOC`,
       cat: "security",
       tag: "Flagship",
@@ -163,8 +181,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "wazuhaiunified",
       title: "Wazuh AI Unified",
-      small: "SIEM + AI terpadu / Python",
-      hook: "Memadukan kemampuan AI ke dalam monitoring keamanan berbasis Wazuh dalam satu alur kerja.",
+      small: "Unified SIEM + AI / Python",
+      hook: "Brings AI capabilities into Wazuh-based security monitoring as a single workflow.",
       url: `${GH}/WazuhAIUnified`,
       cat: "security",
       tag: "Security",
@@ -175,7 +193,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       id: "password-reminderad",
       title: "Password Compliance Enforcer",
       small: "Active Directory · Dashboard / Python",
-      hook: "Pantau tanggal kedaluwarsa password AD, kirim reminder via Microsoft 365, jalankan enforcement dengan aman.",
+      hook: "Track AD password expiry dates, send reminders via Microsoft 365 and run enforcement safely.",
       url: `${GH}/Password-ReminderAD`,
       cat: "security",
       tag: "Security",
@@ -185,8 +203,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "microsoft365-backup",
       title: "Microsoft 365 Backup",
-      small: "Backup self-hosted / Python · Docker",
-      hook: "Backup SharePoint, OneDrive, Outlook & Teams: dashboard operasional, job terjadwal, dan recovery workflow.",
+      small: "Self-hosted backup / Python · Docker",
+      hook: "Back up SharePoint, OneDrive, Outlook & Teams with an ops dashboard, scheduled jobs and recovery workflows.",
       url: `${GH}/Microsoft365-Backup`,
       cat: "infra",
       tag: "Data",
@@ -196,8 +214,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "rtfm-documentlabs",
       title: "RTFM Document Labs",
-      small: "Otomasi dokumen / Python",
-      hook: "Laboratorium tooling untuk memproses dan mengelola dokumen secara terprogram.",
+      small: "Document automation / Python",
+      hook: "A tooling lab for processing and managing documents programmatically.",
       url: `${GH}/RTFM-DocumentLabs`,
       cat: "infra",
       tag: "Tooling",
@@ -207,8 +225,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "brightoria3d",
       title: "Brightoria 3D",
-      small: "Game-based learning 3D / Web · Android",
-      hook: "Belajar berbasis game 3D untuk anak 6-12 tahun, dengan jalur mandiri dan tutor 1-on-1.",
+      small: "3D game-based learning / Web · Android",
+      hook: "Game-based 3D learning for kids aged 6-12, with a self-paced track and 1-on-1 tutoring.",
       url: `${GH}/brightoria3D`,
       cat: "apps",
       tag: "EdTech",
@@ -218,8 +236,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "quran-learning-adventure",
       title: "Qur'an Learning Adventure",
-      small: "Platform belajar interaktif / TypeScript",
-      hook: "Petualangan Qur'an di mana companion dan duniamu tumbuh bersama perjalanan belajarmu.",
+      small: "Interactive learning platform / TypeScript",
+      hook: "A Qur'an adventure where your companion and your world grow along with your learning journey.",
       url: `${GH}/Qur-an-Learning-Adventure-Platform`,
       cat: "apps",
       tag: "EdTech",
@@ -229,8 +247,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "habitcode",
       title: "Code Habit",
-      small: "Habit tracker bergaya terminal / React · Capacitor",
-      hook: "Streak, routine, Pomodoro focus timer, strict mode, dan sinkronisasi cloud antar perangkat.",
+      small: "Terminal-style habit tracker / React · Capacitor",
+      hook: "Streaks, routines, a Pomodoro focus timer, strict mode and cloud sync across devices.",
       url: `${GH}/habitcode`,
       cat: "apps",
       tag: "Mobile",
@@ -240,8 +258,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "lms-homeschooling-uqi",
       title: "LMS Homeschooling UQI",
-      small: "Aplikasi Android / Java",
-      hook: "Aplikasi LMS Android untuk kebutuhan belajar mengajar Homeschooling UQI.",
+      small: "Android app / Java",
+      hook: "An Android LMS app built for the teaching and learning needs of Homeschooling UQI.",
       url: `${GH}/LMS-Android-Apps-HomeschoolingUQI`,
       cat: "apps",
       tag: "Android",
@@ -251,8 +269,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     {
       id: "whoami",
       title: "WhoAmI",
-      small: "Profil & dokumentasi karier / Java",
-      hook: "Perkenalan diri dan dokumentasi perjalanan karier di dunia infrastruktur & cloud security.",
+      small: "Profile & career docs / Java",
+      hook: "A self-introduction and documentation of the journey through infrastructure & cloud security.",
       url: `${GH}/WhoAmI`,
       cat: "other",
       tag: "Pinned",
@@ -264,9 +282,9 @@ export const DEFAULT_CONTENT: SiteContent = {
     num: "02",
     label: "Let's connect",
     titleEn: "Let's build\nsecure things.",
-    titleSub: "Terhubung denganku",
-    lede: "Terbuka untuk kolaborasi projek open source, konsultasi infrastruktur & keamanan cloud, atau sekadar diskusi teknis. Cara tercepat: lewat GitHub.",
-    cta: "Kunjungi GitHub",
+    titleSub: "Get in touch",
+    lede: "Open for open-source collaboration, cloud & security infrastructure consulting, or just a technical chat. Fastest way: GitHub.",
+    cta: "Visit GitHub",
     ctaHref: GH,
     items: [
       {
@@ -286,36 +304,36 @@ export const DEFAULT_CONTENT: SiteContent = {
       {
         id: "email",
         icon: "mail",
-        small: "Email · kolaborasi",
-        main: "Isi lewat Mode Edit",
+        small: "Email · collaboration",
+        main: "Fill in via Edit Mode",
         href: "#",
       },
       {
         id: "linkedin",
         icon: "linkedin",
-        small: "LinkedIn · profesional",
-        main: "Isi lewat Mode Edit",
+        small: "LinkedIn · professional",
+        main: "Fill in via Edit Mode",
         href: "#",
       },
     ],
     keepTitle: "Keep it\nopen.",
     keepBody:
-      "Semua projek di atas open source dan gratis untuk dipelajari. Kalau bermanfaat, beri star, fork, atau buka issue — kontribusi selalu diterima.",
-    keepBtn: "Beri star di GitHub",
+      "Every project above is open source and free to learn from. If it helps you, give it a star, fork it or open an issue — contributions are always welcome.",
+    keepBtn: "Star on GitHub",
     keepHref: GH,
   },
   footer: {
     links: [
-      { label: "Karya", href: "#work" },
-      { label: "Kontak", href: "#contact" },
+      { label: "Work", href: "#work" },
+      { label: "Contact", href: "#contact" },
       { label: "GitHub", href: GH },
     ],
-    note: "Dibangun dengan Next.js & TypeScript. Semua konten bisa diubah lewat Mode Edit lalu dipublikasikan sebagai content.json.",
+    note: "Built with Next.js & TypeScript. Every text on this site can be changed via Edit Mode, then published as content.json.",
     copy: "© 2026 Wahyu Budi Prastowo",
   },
 };
 
-// ---------- helper akses path (mis. "projects.0.title") ----------
+// ---------- path access helpers (e.g. "projects.0.title") ----------
 
 export function getByPath(obj: unknown, path: string): unknown {
   const parts = path.split(".");

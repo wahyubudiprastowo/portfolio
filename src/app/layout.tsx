@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Anton, Caveat, Inter } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
 
 const anton = Anton({
   weight: "400",
@@ -33,13 +32,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Wahyu Budi Prastowo — IT Infrastructure · Cloud Security · Azure",
   description:
-    "Portfolio Wahyu Budi Prastowo: projek open source di bidang cloud security, DevSecOps, infrastruktur Azure, dan aplikasi edukasi. Semua konten bisa diedit lewat Mode Edit.",
+    "Portfolio of Wahyu Budi Prastowo — open-source projects in cloud security, DevSecOps, Azure infrastructure and educational apps. Every text is editable via Edit Mode.",
   keywords: ["Wahyu Budi Prastowo", "Azure", "Cloud Security", "DevSecOps", "portfolio", "open source"],
   authors: [{ name: "Wahyu Budi Prastowo", url: "https://github.com/wahyubudiprastowo" }],
   openGraph: {
     title: "Wahyu Budi Prastowo — IT Infrastructure · Cloud Security · Azure",
     description:
-      "Projek open source di bidang cloud security, DevSecOps, dan aplikasi edukasi.",
+      "Open-source projects in cloud security, DevSecOps, Azure infrastructure and educational apps.",
     siteName: "Wahyu Budi Prastowo",
     type: "website",
   },
@@ -51,12 +50,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${anton.variable} ${inter.variable} ${caveat.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <Toaster />
       </body>
     </html>
   );

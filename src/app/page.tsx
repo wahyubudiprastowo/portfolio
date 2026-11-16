@@ -8,12 +8,17 @@ import { WorkSection } from "@/components/site/work-section";
 import { ContactSection } from "@/components/site/contact-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { EditToolbar } from "@/components/site/edit-toolbar";
+import { CustomCursor } from "@/components/site/cursor";
+import { ScrollProgress } from "@/components/site/scroll-progress";
+import { Marquee } from "@/components/site/marquee";
 
 function PageBody() {
-  const { editing } = useSite();
+  const { content, editing } = useSite();
+  const words = content.ticker?.words ?? [];
 
   return (
     <div className="site-root min-h-screen flex flex-col">
+      <ScrollProgress />
       <div className="grain" aria-hidden="true" />
       <div className="guides" aria-hidden="true">
         <span /><span /><span /><span /><span /><span />
@@ -23,14 +28,17 @@ function PageBody() {
 
       <main className="page" id="page">
         <Hero />
+        <Marquee variant="red" words={words} />
         <WorkSection />
+        <Marquee variant="ghost" reverse words={words} />
         <ContactSection />
       </main>
 
       <SiteFooter />
       <EditToolbar />
+      <CustomCursor />
 
-      {/* Saat Mode Edit aktif, cegah navigasi link tak sengaja */}
+      {/* While Edit Mode is on, keep links clickable without navigating away */}
       {editing && <style>{`.site-root a{pointer-events:auto}`}</style>}
 
       <Toaster
