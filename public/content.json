@@ -1,0 +1,261 @@
+{
+  "meta": {
+    "title": "Wahyu Budi Prastowo — IT Infrastructure · Cloud Security · Azure",
+    "description": "Portfolio Wahyu Budi Prastowo: projek open source di bidang cloud security, DevSecOps, infrastruktur Azure, dan aplikasi edukasi."
+  },
+  "brand": "WAHYU",
+  "hero": {
+    "hello": "Hello, I'm",
+    "name": "Wahyu Budi Prastowo",
+    "dot": ".",
+    "role": "IT Infrastructure Specialist\nCloud Security · Azure · DevSecOps",
+    "desc": "Lebih dari 10 tahun merancang infrastruktur yang aman, scalable, dan high-performance — dari Azure dan Microsoft 365 sampai Security Operations. Suka otomasi, minim kerja manual berulang.",
+    "ctaPrimary": "Lihat Projek",
+    "ctaSecondary": "GitHub",
+    "ctaSecondaryHref": "https://github.com/wahyubudiprastowo",
+    "tagline": "Setiap sistem,\ndibangun di atas keamanan.",
+    "photoUrl": "https://avatars.githubusercontent.com/wahyubudiprastowo?s=640",
+    "photoCaption": "Wahyu B.P.",
+    "photoAlt": "Foto profil Wahyu Budi Prastowo dari GitHub",
+    "stripLeft": "Projek unggulan: AgenticAiSOC",
+    "stripLeftHref": "https://github.com/wahyubudiprastowo/AgenticAiSOC",
+    "stripMid": "Scroll ke bawah",
+    "stripRight": "Open source / GitHub"
+  },
+  "stats": [
+    {
+      "n": "10",
+      "small": "+",
+      "t": "Tahun pengalaman IT",
+      "sub": "Infrastructure & Cloud"
+    },
+    {
+      "n": "10",
+      "small": "",
+      "t": "Repositori publik",
+      "sub": "Open source"
+    },
+    {
+      "n": "17",
+      "small": "",
+      "t": "Kategori deteksi di AgenticAiSOC",
+      "sub": "Detection categories"
+    }
+  ],
+  "work": {
+    "num": "01",
+    "label": "Selected work",
+    "titleEn": "Work that ships.",
+    "titleSub": "Projek yang jalan",
+    "aside": "10 projek · semua open source",
+    "note": "Klik kartu untuk membuka repositorinya di GitHub — README tiap projek berisi cara pakai dan arsitekturnya.",
+    "tabs": [
+      {
+        "id": "all",
+        "label": "Semua"
+      },
+      {
+        "id": "security",
+        "label": "Keamanan"
+      },
+      {
+        "id": "infra",
+        "label": "Infra & Otomasi"
+      },
+      {
+        "id": "apps",
+        "label": "Aplikasi"
+      },
+      {
+        "id": "other",
+        "label": "Lainnya"
+      }
+    ],
+    "toolsLabel": "Built with",
+    "toolsLabelSub": "Tools yang saya pakai",
+    "tools": [
+      "Azure",
+      "Microsoft 365",
+      "Docker",
+      "Python",
+      "TypeScript",
+      "Wazuh",
+      "React",
+      "GitHub Actions"
+    ],
+    "addBtn": "Tambah projek"
+  },
+  "projects": [
+    {
+      "id": "agenticaisoc",
+      "title": "Agentic AI SOC",
+      "small": "Agentic AI · 17 kategori deteksi / Python",
+      "hook": "SOC full-stack: Wazuh, Defender XDR, threat intel, orkestrator Hermes, dan memori Qdrant dalam satu alur.",
+      "url": "https://github.com/wahyubudiprastowo/AgenticAiSOC",
+      "cat": "security",
+      "tag": "Flagship",
+      "lang": "Python",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/AgenticAiSOC"
+    },
+    {
+      "id": "wazuhaiunified",
+      "title": "Wazuh AI Unified",
+      "small": "SIEM + AI terpadu / Python",
+      "hook": "Memadukan kemampuan AI ke dalam monitoring keamanan berbasis Wazuh dalam satu alur kerja.",
+      "url": "https://github.com/wahyubudiprastowo/WazuhAIUnified",
+      "cat": "security",
+      "tag": "Security",
+      "lang": "Python",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/WazuhAIUnified"
+    },
+    {
+      "id": "password-reminderad",
+      "title": "Password Compliance Enforcer",
+      "small": "Active Directory · Dashboard / Python",
+      "hook": "Pantau tanggal kedaluwarsa password AD, kirim reminder via Microsoft 365, jalankan enforcement dengan aman.",
+      "url": "https://github.com/wahyubudiprastowo/Password-ReminderAD",
+      "cat": "security",
+      "tag": "Security",
+      "lang": "Python",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/Password-ReminderAD"
+    },
+    {
+      "id": "microsoft365-backup",
+      "title": "Microsoft 365 Backup",
+      "small": "Backup self-hosted / Python · Docker",
+      "hook": "Backup SharePoint, OneDrive, Outlook & Teams: dashboard operasional, job terjadwal, dan recovery workflow.",
+      "url": "https://github.com/wahyubudiprastowo/Microsoft365-Backup",
+      "cat": "infra",
+      "tag": "Data",
+      "lang": "Python",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/Microsoft365-Backup"
+    },
+    {
+      "id": "rtfm-documentlabs",
+      "title": "RTFM Document Labs",
+      "small": "Otomasi dokumen / Python",
+      "hook": "Laboratorium tooling untuk memproses dan mengelola dokumen secara terprogram.",
+      "url": "https://github.com/wahyubudiprastowo/RTFM-DocumentLabs",
+      "cat": "infra",
+      "tag": "Tooling",
+      "lang": "Python",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/RTFM-DocumentLabs"
+    },
+    {
+      "id": "brightoria3d",
+      "title": "Brightoria 3D",
+      "small": "Game-based learning 3D / Web · Android",
+      "hook": "Belajar berbasis game 3D untuk anak 6-12 tahun, dengan jalur mandiri dan tutor 1-on-1.",
+      "url": "https://github.com/wahyubudiprastowo/brightoria3D",
+      "cat": "apps",
+      "tag": "EdTech",
+      "lang": "TypeScript",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/brightoria3D"
+    },
+    {
+      "id": "quran-learning-adventure",
+      "title": "Qur'an Learning Adventure",
+      "small": "Platform belajar interaktif / TypeScript",
+      "hook": "Petualangan Qur'an di mana companion dan duniamu tumbuh bersama perjalanan belajarmu.",
+      "url": "https://github.com/wahyubudiprastowo/Qur-an-Learning-Adventure-Platform",
+      "cat": "apps",
+      "tag": "EdTech",
+      "lang": "TypeScript",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/Qur-an-Learning-Adventure-Platform"
+    },
+    {
+      "id": "habitcode",
+      "title": "Code Habit",
+      "small": "Habit tracker bergaya terminal / React · Capacitor",
+      "hook": "Streak, routine, Pomodoro focus timer, strict mode, dan sinkronisasi cloud antar perangkat.",
+      "url": "https://github.com/wahyubudiprastowo/habitcode",
+      "cat": "apps",
+      "tag": "Mobile",
+      "lang": "TypeScript",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/habitcode"
+    },
+    {
+      "id": "lms-homeschooling-uqi",
+      "title": "LMS Homeschooling UQI",
+      "small": "Aplikasi Android / Java",
+      "hook": "Aplikasi LMS Android untuk kebutuhan belajar mengajar Homeschooling UQI.",
+      "url": "https://github.com/wahyubudiprastowo/LMS-Android-Apps-HomeschoolingUQI",
+      "cat": "apps",
+      "tag": "Android",
+      "lang": "Java",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/LMS-Android-Apps-HomeschoolingUQI"
+    },
+    {
+      "id": "whoami",
+      "title": "WhoAmI",
+      "small": "Profil & dokumentasi karier / Java",
+      "hook": "Perkenalan diri dan dokumentasi perjalanan karier di dunia infrastruktur & cloud security.",
+      "url": "https://github.com/wahyubudiprastowo/WhoAmI",
+      "cat": "other",
+      "tag": "Pinned",
+      "lang": "Java",
+      "img": "https://opengraph.githubassets.com/1/wahyubudiprastowo/WhoAmI"
+    }
+  ],
+  "contact": {
+    "num": "02",
+    "label": "Let's connect",
+    "titleEn": "Let's build\nsecure things.",
+    "titleSub": "Terhubung denganku",
+    "lede": "Terbuka untuk kolaborasi projek open source, konsultasi infrastruktur & keamanan cloud, atau sekadar diskusi teknis. Cara tercepat: lewat GitHub.",
+    "cta": "Kunjungi GitHub",
+    "ctaHref": "https://github.com/wahyubudiprastowo",
+    "items": [
+      {
+        "id": "gh",
+        "icon": "github",
+        "small": "GitHub",
+        "main": "@wahyubudiprastowo",
+        "href": "https://github.com/wahyubudiprastowo"
+      },
+      {
+        "id": "flagship",
+        "icon": "star",
+        "small": "Flagship · AgenticAiSOC",
+        "main": "Agentic AI SOC Platform",
+        "href": "https://github.com/wahyubudiprastowo/AgenticAiSOC"
+      },
+      {
+        "id": "email",
+        "icon": "mail",
+        "small": "Email · kolaborasi",
+        "main": "Isi lewat Mode Edit",
+        "href": "#"
+      },
+      {
+        "id": "linkedin",
+        "icon": "linkedin",
+        "small": "LinkedIn · profesional",
+        "main": "Isi lewat Mode Edit",
+        "href": "#"
+      }
+    ],
+    "keepTitle": "Keep it\nopen.",
+    "keepBody": "Semua projek di atas open source dan gratis untuk dipelajari. Kalau bermanfaat, beri star, fork, atau buka issue — kontribusi selalu diterima.",
+    "keepBtn": "Beri star di GitHub",
+    "keepHref": "https://github.com/wahyubudiprastowo"
+  },
+  "footer": {
+    "links": [
+      {
+        "label": "Karya",
+        "href": "#work"
+      },
+      {
+        "label": "Kontak",
+        "href": "#contact"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/wahyubudiprastowo"
+      }
+    ],
+    "note": "Dibangun dengan Next.js & TypeScript. Semua konten bisa diubah lewat Mode Edit lalu dipublikasikan sebagai content.json.",
+    "copy": "© 2026 Wahyu Budi Prastowo"
+  }
+}

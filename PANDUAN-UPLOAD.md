@@ -1,0 +1,141 @@
+# PANDUAN UPLOAD — Website Portfolio Wahyu Budi Prastowo ke GitHub Pages
+
+Website ini di-desain agar bisa langsung di-upload ke **GitHub Pages** (sama seperti
+situs referensi popolab-tw.github.io). Semua langkah di bawah bisa dilakukan dari
+browser, tanpa install apapun.
+
+---
+
+## Yang perlu dipahami dulu (2 menit)
+
+| Bagian | Fungsi |
+| --- | --- |
+| `src/` | Kode tampilan website (tidak perlu diubah untuk ganti isi) |
+| `public/content.json` | **SELURUH ISI WEBSITE** — teks, projek, statistik, kontak |
+| Mode Edit (tombol di website) | Ubah isi langsung di browser, tanpa koding |
+| `.github/workflows/deploy-pages.yml` | Otomatis membangun & menayangkan website setiap kali repo di-update |
+
+**Alur kerja yang disarankan:** edit isi lewat Mode Edit di browser → klik
+**Ekspor** (mengunduh `content.json`) → ganti file `public/content.json` di GitHub
+→ website otomatis ter-update untuk semua pengunjung.
+
+---
+
+## BAGIAN 1 — Upload website (sekali saja)
+
+### Cara A: lewat web GitHub (paling mudah, tanpa terminal)
+
+1. Login di [github.com](https://github.com) dengan akun **wahyubudiprastowo**.
+2. Klik **+** (kanan atas) → **New repository**.
+   - Nama repo bebas, contoh: `portfolio`.
+   - Pilih **Public** (wajib untuk GitHub Pages gratis).
+   - Klik **Create repository**.
+3. Di halaman repo baru, klik link **uploading an existing file** (atau tombol
+   **Add file → Upload files**).
+4. **Upload SEMUA file dan folder** proyek ini **KECUALI** folder
+   `node_modules`, `.next`, `db`, dan `tests`.
+   - Trik: jika browser tidak bisa drag-drop banyak folder, buat ZIP isinya
+     dulu, ekstrak di komputer, lalu drag satu per satu.
+   - Pastikan folder `.github` ikut ter-upload (inilah yang membuat website
+     otomatis ter-build). Kalau folder `.github` tidak bisa dipilih karena
+     tersembunyi, ganti nama sementara menjadi `github` saat upload, lalu setelah
+     ter-upload rename kembali menjadi `.github` di GitHub (Edit/rename folder).
+5. Tulis pesan commit, misalnya `upload website portfolio`, lalu klik
+   **Commit changes**.
+6. Buka tab **Settings** repo → menu **Pages** → pada **Build and deployment →
+   Source**, pilih **GitHub Actions**.
+7. Selesai. Buka tab **Actions** repo dan tunggu workflow **Deploy ke GitHub Pages**
+   berwarna hijau (± 2-4 menit).
+8. Website live di:
+   - Repo `portfolio` → `https://wahyubudiprastowo.github.io/portfolio/`
+   - Jika repo Anda bernama `wahyubudiprastowo.github.io` →
+     `https://wahyubudiprastowo.github.io/` (alamat paling pendek dan rapi).
+
+### Cara B: lewat terminal (jika terbiasa git)
+
+```bash
+git init
+git add .
+git commit -m "website portfolio wahyu"
+git branch -M main
+git remote add origin https://github.com/wahyubudiprastowo/portfolio.git
+git push -u origin main
+```
+
+Lalu lanjut ke langkah 6 di atas (Settings → Pages → Source: **GitHub Actions**).
+
+---
+
+## BAGIAN 2 — Mengedit isi website
+
+### Opsi 1: Mode Edit (tanpa koding, direkomendasikan)
+
+1. Buka website Anda, klik tombol **Mode Edit** (di header kanan atas atau
+   toolbar bawah).
+2. **Klik teks mana pun** untuk mengubahnya: nama, deskripsi, statistik, teks
+   kontak, catatan footer, semuanya bisa langsung diketik ulang.
+3. Untuk kartu projek: klik ikon **gerigi** di pojok kartu. Di situ Anda bisa
+   mengubah judul, subjudul, hook, URL, bahasa, label, kategori, gambar, atau
+   **menghapus** kartu.
+4. Tombol **+ Tambah projek** menambah kartu baru di bagian Karya.
+5. Perubahan otomatis tersimpan di **browser Anda** (localStorage).
+   Tombol **Reset** membuang semua perubahan; **Impor** memuat `content.json`.
+6. Klik **Ekspor** → file `content.json` terunduh. Ini versi final isi website.
+7. Publikasikan: buka repo GitHub → `public/content.json` → ikon **pensil**
+   (Edit) → hapus isinya, paste isi file hasil ekspor (buka file
+   `content.json` dengan Notepad, salin semuanya) → **Commit changes**.
+8. GitHub Actions otomatis rebuild ± 2 menit → semua pengunjung melihat isi baru.
+
+> Catatan: perubahan yang hanya tersimpan di localStorage TIDAK terlihat oleh
+> pengunjung lain. Ekspor + replace `public/content.json` adalah cara
+> mempublikasikannya.
+
+### Opsi 2: Edit `content.json` langsung di GitHub
+
+Tanpa buka website sama sekali: repo → `public/content.json` → pensil → ubah
+teks yang diinginkan (hati-hati dengan tanda kutip dan koma) → Commit.
+
+Struktur singkat:
+
+```json
+{
+  "hero": { "name": "Wahyu Budi Prastowo", "desc": "..." },
+  "stats": [ { "n": "10", "small": "+", "t": "Tahun pengalaman IT" } ],
+  "projects": [ { "title": "Agentic AI SOC", "url": "https://github.com/..." } ],
+  "contact": { "items": [ ... ] }
+}
+```
+
+---
+
+## BAGIAN 3 — Hal yang belum terisi (jangan lupa!)
+
+Field berikut sengaja dikosongkan karena datanya tidak ada di GitHub profil
+Anda. Isi lewat Mode Edit lalu publikasikan:
+
+1. **Email** (kartu kontak ke-3) — masih `Isi lewat Mode Edit`, isi juga
+   alamat `href`-nya di `content.json` (ganti `"#"` menjadi `mailto:nama@email.com`).
+2. **LinkedIn** (kartu kontak ke-4) — sama, isi URL profil LinkedIn Anda.
+3. Deskripsi repo yang belum punya deskripsi di GitHub (RTFM-DocumentLabs,
+   WazuhAIUnified, dsb) sudah saya tulis perkiraan dari namanya — silakan
+   koreksi agar 100% akurat.
+
+---
+
+## BAGIAN 4 — Mengembangkan lebih lanjut (opsional)
+
+```bash
+bun install        # pasang dependensi
+bun run dev        # jalan di http://localhost:3000
+bun run lint       # cek kualitas kode
+```
+
+Build versi Pages secara manual (hasil di folder `out/`):
+
+```bash
+PAGES_BUILD=1 PAGES_BASE_PATH=/portfolio bun x next build
+```
+
+- Mengganti warna aksen: variabel `--red` di `src/app/globals.css`.
+- Mengganti font: `src/app/layout.tsx` (Anton / Inter / Caveat).
+- Struktur lengkap tipe data: `src/lib/site-content.ts`.
