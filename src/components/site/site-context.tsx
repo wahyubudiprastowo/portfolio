@@ -15,7 +15,7 @@ import {
   type SiteContent,
 } from "@/lib/site-content";
 
-const LS_KEY = "wahyu-portfolio-content-v1";
+const LS_KEY = "wahyu-portfolio-content-v2";
 const LS_MOTION = "wahyu-portfolio-motion";
 
 export type SaveStatus = "idle" | "saving" | "saved";

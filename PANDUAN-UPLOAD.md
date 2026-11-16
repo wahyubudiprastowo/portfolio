@@ -9,14 +9,17 @@ browser, tanpa install apapun.
 
 ---
 
-## Fitur motion & efek dinamis (v2)
+## Fitur motion & efek dinamis (v3)
 
 Situs kini punya efek lengkap bergaya POPOLAB — semuanya otomatis dan bisa dimatikan:
 
 | Efek | Detail |
 | --- | --- |
+| **Swarm cursors (kursor berlarian)** | 10 kursor AI bernama (Claude Opus, Claude Fable, Wahyu, ChatGPT, Gemini, Grok, DeepSeek, Copilot, Perplexity, Llama) terbang masuk saat halaman dibuka, lalu: saat mouse bergerak mereka mengorbit mouse anda seperti kolaborator di Figma; saat mouse diam mereka "bekerja" sendiri — membaca teks (menyapu highlight warna), mengklik tombol (kotak seleksi + ripple, hanya visual, tidak benar-benar menekan), dan membingkai gambar/judul dengan kotak berukuran W × H ala aplikasi desain. Versi seluler mendapat 4 kursor. |
 | **Custom cursor** | Titik merah + ring yang mengikuti mouse; membesar di link; berubah jadi bulatan merah "OPEN" di atas kartu projek. Nonaktif di perangkat sentuh. |
-| **Marquee ticker** | Pita merah miring raksasa (Cloud Security ✦ DevSecOps ✦ Azure ✦ …) setelah hero + pita outline sebelum kontak. Berhenti saat di-hover. |
+| **Marquee ticker** | Pita merah miring raksasa (Cloud Security ✦ DevSecOps ✦ Azure ✦ …) setelah hero + pita outline sebelum kontak. Berhenti saat di-hover; tepi memudar halus. |
+| **Foto GTA VI** | Foto hero kini ilustrasi bergaya *GTA loading screen* (`public/gta-portrait.webp`) plus stiker kecil "Main characters" (crop wajah, `public/gta-faces.webp`) yang menumpuk di pojok polaroid. Ganti filenya (nama sama) untuk ganti foto. Caption keduanya bisa diedit di Mode Edit (`hero.photoCaption`, `hero.stickerCaption`). |
+| **Heading sweep** | Judul besar (WORK THAT SHIPS. / LET'S BUILD SECURE THINGS.) menyapu masuk dari kiri dengan clip mask saat terlihat. |
 | **Floating tags** | Chip teknologi (Azure, Wazuh, Python…) mengambang di sekitar foto — bisa diedit langsung di Mode Edit. |
 | **Magnetic buttons** | Tombol CTA tertarik mengikuti kursor. |
 | **Parallax** | Teks raksasa WAHYU bergeser & memudar saat scroll. |
@@ -26,6 +29,7 @@ Situs kini punya efek lengkap bergaya POPOLAB — semuanya otomatis dan bisa dim
 | **Intro stagger** | Bagian hero muncul berurutan saat halaman dibuka. |
 | **Scroll progress** | Garis merah tipis di atas = sisa halaman. |
 | **Count-up + jam live** | Statistik berhitung naik; jam Jakarta (WIB) berdetak di footer. |
+| **Micro-interactions** | Panah "SCROLL DOWN" memantul, halo berdenyut di tombol play, underline merah meluncur di tab filter, ring putus-putus berputar di CTA lingkaran, dot logo berkedip, chip tools & baris kontak terangkat saat hover. |
 
 Semua efek mati bila tombol **Motion → Off** (tersimpan di browser) atau bila OS
 user mengaktifkan *reduced motion*.

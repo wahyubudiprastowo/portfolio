@@ -1,0 +1,798 @@
+     1→/* =========================================================
+     2→   POPOLAB swarm — 自己寫的輕量版「游標蜂群」
+     3→   效果靈感來自多人協作設計工具的游標，以及 swarm-cursors（Swarm Rebuild，
+     4→   DhvanilPatel/swarm-cursors）的展示；程式碼為本站從頭撰寫，沒有使用它的原始碼。
+     5→   1. 施工開場：每次進入頁面，一群游標在幾秒內分工「蓋出」第一屏
+     6→      （拖框、打字、放大、鋼筆畫線、拉參考線、拖曳複製、點擊上色）
+     7→      （可略過、可設定不再播放、捲動即結束、尊重「減少動態效果」）
+     8→   2. 常駐游標：開場後留在畫面上
+     9→      - 滑鼠在動：大多數游標跟著你
+    10→      - 滑鼠停下：游標會自己去讀某一行字、點按鈕、框選圖片
+    11→      - 只是視覺效果：不會真的點擊，也不會擋住任何操作
+    12→   ========================================================= */
+    13→(function () {
+    14→  'use strict';
+    15→  var P = window.POPOLAB || { store: { get: function () { return null; }, set: function () {} }, motionOn: function () { return true; } };
+    16→  var root = document.documentElement;
+    17→  /* 只用名字和接近品牌的顏色，不用任何 logo */
+    18→  var ROSTER = [
+    19→    { n: 'Claude Opus', c: '#d97757' },
+    20→    { n: 'Claude Fable', c: '#f0a37c', dark: true },
+    21→    { n: 'Popo', c: '#ff1e2d' },
+    22→    { n: 'ChatGPT', c: '#10a37f' },
+    23→    { n: 'Gemini', c: '#4c8df6' },
+    24→    { n: 'Grok', c: '#ffffff', dark: true },
+    25→    { n: 'DeepSeek', c: '#4d6bfe' },
+    26→    { n: 'Copilot', c: '#9b6bff' },
+    27→    { n: 'Perplexity', c: '#20b8cd' },
+    28→    { n: 'Llama', c: '#ff6b9a' }
+    29→  ];
+    30→  var fine = window.matchMedia && matchMedia('(pointer: fine)').matches;
+    31→  var small = window.innerWidth < 820;
+    32→  /* 常駐游標的節奏：同時做事的數量、讀字速度、休息時間、最高速度 */
+    33→  var T = {
+    34→    tasks: true,
+    35→    maxBusy: small ? 2 : 3,                 /* 安全上限：很少碰到，只防止剛好同時一起動 */
+    36→    readSpeed: small ? 110 : 150,           /* 讀字速度（px/秒） */
+    37→    travelSpeed: .32,                       /* 框選拉框的速度（px/毫秒） */
+    38→    restMin: small ? 14000 : 18000,         /* 做完一件事後，在原地飄多久（隨機） */
+    39→    restMax: small ? 44000 : 54000,
+    40→    followMax: 9
+    41→  };
+    42→  var READ_SEL = '.hero-desc,.hero-role,.lede,.w-hook,.prose p,.prose li,.tip p,.row .rt,.tl .what,.card .hook,.step span span,.big-sub,.support p,.small,.ci .ct,.wins .wt,.quote-card blockquote,.h-zh';
+    43→  var CLICK_SEL = '.btn,.tab,.card .thumb,.hd-cta,.ci,.play-link,.chip,.wins li a,.tl summary,.link,.circle-cta,.pager a,.motion-toggle,.yt-facade,.media-link,.crumbs a';
+    44→  var INSPECT_SEL = '.card .thumb img,.hero-visual img,.h-en,.w-title,.big-stat,.quote-card,.ba,.media-frame,.tilt-card,.stat,.gallery img,.w-stat,.tip';
+    45→
+    46→  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+    47→  /* ---------- 游標外觀：會依工具換形狀 ---------- */
+    48→  function arrowSVG(c, dark, w, h) {
+    49→    return '<svg viewBox="0 0 20 22" width="' + (w || 20) + '" height="' + (h || 22) + '" aria-hidden="true"><path d="M2.5 1.8l14.6 8.1-6.5 1.7-3.5 6.5z" fill="' + c + '" stroke="' + (dark ? '#111' : '#fff') + '" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+    50→  }
+    51→  function stroke2(d, vb, w, h) {
+    52→    return '<svg viewBox="' + vb + '" width="' + w + '" height="' + h + '" fill="none" aria-hidden="true"><path d="' + d + '" stroke="#000" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="' + d + '" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    53→  }
+    54→  var TOOLS = {
+    55→    cross: { ox: -10, oy: -10, svg: function () { return stroke2('M10 2v6M10 12v6M2 10h6M12 10h6', '0 0 20 20', 20, 20); } },
+    56→    ibeam: { ox: -6, oy: -11, svg: function () { return stroke2('M3 2h6M6 2v18M3 20h6', '0 0 12 22', 12, 22); } },
+    57→    resize: { ox: -10, oy: -10, svg: function () { return stroke2('M4 4l12 12M4 4h5M4 4v5M16 16h-5M16 16v-5', '0 0 20 20', 20, 20); } },
+    58→    move: { ox: -11, oy: -11, svg: function () { return stroke2('M11 2v18M2 11h18M11 2l-3 3M11 2l3 3M11 20l-3-3M11 20l3-3M2 11l3-3M2 11l3 3M20 11l-3-3M20 11l-3 3', '0 0 22 22', 22, 22); } },
+    59→    pen: { ox: -3, oy: -19, svg: function () { return stroke2('M3 19l2.5-7.5L14 3l3 3-8.5 8.5L3 19zM3 19l5-5', '0 0 20 22', 20, 22); } },
+    60→    dup: { ox: 0, oy: 0, svg: function (c, dark) { return '<svg viewBox="0 0 26 24" width="26" height="24" aria-hidden="true"><path d="M7.5 5.8l12.6 7-5.6 1.5-3 5.6z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round" opacity=".85"/><path d="M2.5 1.8l14.6 8.1-6.5 1.7-3.5 6.5z" fill="' + c + '" stroke="' + (dark ? '#111' : '#fff') + '" stroke-width="1.5" stroke-linejoin="round"/></svg>'; } }
+    61→  };
+    62→  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    63→  function rand(a, b) { return a + Math.random() * (b - a); }
+    64→  function esc(s) { return s.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+    65→  function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; }
+    66→  function introOn() { return P.store.get('popolab-intro') !== 'off'; }
+    67→  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    68→
+    69→  /* ---------- 游標代理人 ---------- */
+    70→  /* i < 10：有名字的游標（Claude Opus、Claude Fable、Popo…）；i >= 10：開場時來幫忙的無名游標 */
+    71→  function Agent(layer, i) {
+    72→    var named = i < ROSTER.length, r = named ? ROSTER[i] : { c: '#ffffff', dark: true };
+    73→    this.i = i; this.c = r.c; this.dark = !!r.dark; this.named = named;
+    74→    this.e = el('div', 'sw-agent' + (named ? '' : ' anon'), '<i class="tool"></i>' + (named ? '<b style="background:' + r.c + (r.dark ? ';color:#111' : '') + '">' + r.n + '</b>' : ''));
+    75→    this.toolEl = this.e.querySelector('.tool');
+    76→    this.setTool('arrow');
+    77→    layer.appendChild(this.e);
+    78→    var side = i % 2 ? 1 : -1;
+    79→    this.x = side > 0 ? innerWidth + rand(10, 50) : -rand(10, 50);
+    80→    this.y = rand(innerHeight * .15, innerHeight * .85);
+    81→    this.vx = 0; this.vy = 0; this.seg = null; this.queue = []; this.task = null; this.next = 0; this.recent = []; this.cont = null; this.anchor = null; this.hopAt = 0;
+    82→    this.home = { x: rand(innerWidth * .1, innerWidth * .9), y: rand(innerHeight * .2, innerHeight * .8) };
+    83→    this.ph = rand(0, Math.PI * 2); this.w = rand(.6, 1.2); this.r = rand(46, 120);
+    84→    this.draw();
+    85→  }
+    86→  Agent.prototype.setTool = function (name) {
+    87→    if (this.tool === name) return;
+    88→    this.tool = name;
+    89→    var t = TOOLS[name];
+    90→    this.toolEl.innerHTML = t ? t.svg(this.c, this.dark) : arrowSVG(this.c, this.dark);
+    91→    this.toolEl.style.transform = t ? 'translate(' + t.ox + 'px,' + t.oy + 'px)' : '';
+    92→  };
+    93→  Agent.prototype.draw = function () { this.e.style.transform = 'translate3d(' + this.x.toFixed(1) + 'px,' + this.y.toFixed(1) + 'px,0)'; };
+    94→  Agent.prototype.go = function (x, y, dur, onUpdate, onDone, curve) { this.queue.push({ x: x, y: y, dur: dur, u: onUpdate, d: onDone, ez: curve === true ? 'lin' : curve }); };
+    95→  Agent.prototype.clear = function () { this.queue = []; this.seg = null; };
+    96→  Agent.prototype.stepSeg = function (dt) {
+    97→    if (!this.seg && this.queue.length) { this.seg = this.queue.shift(); this.seg.fx = this.x; this.seg.fy = this.y; this.seg.t = 0; }
+    98→    if (!this.seg) return false;
+    99→    var s = this.seg; s.t += dt;
+   100→    var p = Math.min(1, s.t / s.dur), ez = s.ez || (this.soft ? 'sine' : 'cubic');
+   101→    var e = ez === 'lin' ? p : ez === 'sine' ? (1 - Math.cos(Math.PI * p)) / 2 : ez === 'quad' ? (p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2) : ease(p);
+   102→    this.x = s.fx + (s.x - s.fx) * e; this.y = s.fy + (s.y - s.fy) * e;
+   103→    if (s.u) s.u(p);
+   104→    if (p >= 1) { this.seg = null; if (s.d) s.d(); }
+   105→    return true;
+   106→  };
+   107→  Agent.prototype.idle = function (dt, now) {
+   108→    var hx = this.home.x + Math.cos(now / 900 * this.w + this.ph) * 26;
+   109→    var hy = this.home.y + Math.sin(now / 1100 * this.w + this.ph) * 18;
+   110→    this.vx += (hx - this.x) * .0025 * dt; this.vy += (hy - this.y) * .0025 * dt;
+   111→    this.vx *= .86; this.vy *= .86; this.x += this.vx; this.y += this.vy;
+   112→  };
+   113→  Agent.prototype.press = function () { var e = this.e; e.classList.add('press'); setTimeout(function () { e.classList.remove('press'); }, 170); };
+   114→  /* 跑去做事：和開場同一條加速減速曲線，但時間拉長約 1.5 倍，最高速度比開場低一些 */
+   115→  Agent.prototype.travel = function (x, y) { return Math.max(340, Math.min(1000, Math.hypot(x - this.x, y - this.y) / 1.4)); };
+   116→  /* 開場時跑得比較快 */
+   117→  Agent.prototype.dash = function (x, y) { return Math.max(200, Math.min(560, Math.hypot(x - this.x, y - this.y) / 2.2)); };
+   118→
+   119→  /* =========================================================
+   120→     1. 施工開場
+   121→     把第一屏拆成很多「圖層」，讓一群游標分工重建：
+   122→     - 十字游標拖出灰色佔位框，再填上真的內容（圖片由上往下掃出來）
+   123→     - 文字直接被建立在旁邊，再被拖回正確位置、同時拉伸；大標題先小小地出現，再拖曳角落放大
+   124→     - 鋼筆點出分隔線；從尺規拉出紅色參考線
+   125→     - 重複的元件先做一個，再拖曳複製出其他幾個，然後改字
+   126→     - 紅色按鈕先是灰的，被點一下才變紅
+   127→     ========================================================= */
+   128→  var S = { running: false, layer: null, agents: [], boxes: [], guides: [], hud: null, t0: 0, raf: 0, done: 0, total: 0, finished: false, tasks: [], touched: [] };
+   129→
+   130→  function shouldBuild() {
+   131→    if (!document.querySelector('[data-build]')) return false;
+   132→    if (!P.motionOn() || !introOn()) return false;
+   133→    if (window.scrollY > 10 || location.hash) return false;
+   134→    return true;
+   135→  }
+   136→  function revealAll() {
+   137→    S.touched.forEach(function (n) { n.style.visibility = ''; n.style.clipPath = ''; n.style.transform = ''; n.style.transformOrigin = ''; n.style.filter = ''; n.style.transition = ''; n.style.position = ''; n.style.left = ''; n.style.top = ''; n.classList.remove('sw-in', 'sw-pop'); });
+   138→    document.querySelectorAll('[data-build]').forEach(function (n) { n.style.visibility = ''; n.style.opacity = ''; n.style.clipPath = ''; });
+   139→    S.touched = [];
+   140→    root.classList.remove('swarm-pending');
+   141→  }
+   142→  function touch(n) { if (S.touched.indexOf(n) < 0) S.touched.push(n); return n; }
+   143→  function hideEl(n) { touch(n).style.visibility = 'hidden'; }
+   144→  function showEl(n, anim) {
+   145→    touch(n).style.visibility = 'visible';
+   146→    var r = n.closest('[data-build]');
+   147→    if (r && r !== n) touch(r).style.visibility = 'visible';
+   148→    if (anim) { n.classList.remove(anim); void n.offsetWidth; n.classList.add(anim); }
+   149→  }
+   150→
+   151→  /* ---- 把第一屏拆成圖層 ---- */
+   152→  function hasText(n) { for (var c = n.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && /\S/.test(c.nodeValue)) return true; return false; }
+   153→  function deco(n, cs) {
+   154→    var bg = cs.backgroundColor, hasBg = bg && bg !== 'transparent' && !/rgba\([^)]*,\s*0\)$/.test(bg);
+   155→    var sides = ['Top', 'Right', 'Bottom', 'Left'].map(function (s) { return parseFloat(cs['border' + s + 'Width']) > 0 && cs['border' + s + 'Style'] !== 'none'; });
+   156→    if (hasBg || (cs.backgroundImage !== 'none' && !/text/.test(cs.webkitBackgroundClip || cs.backgroundClip || ''))) return 'rect';
+   157→    if (sides.every(Boolean)) return 'rect';
+   158→    if (sides[0]) return 'line-top';
+   159→    if (sides[2]) return 'line-bottom';
+   160→    return null;
+   161→  }
+   162→  function gkey(n) { return n.tagName + '.' + (n.classList[0] || ''); }
+   163→  function similar(a, b) {
+   164→    var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+   165→    if (!ra.height || !rb.height) return false;
+   166→    var hr = Math.max(ra.height, rb.height) / Math.min(ra.height, rb.height);
+   167→    return hr < 1.8 && a.children.length === b.children.length;
+   168→  }
+   169→  function inFirstScreen(r) { return r.width >= 1 && r.height >= 1 && r.top < innerHeight * .98 && r.bottom > 0; }
+   170→  function T_(type, n, r, deps) { var t = { type: type, el: n, r: r, deps: deps || [], done: false, taken: false }; hideEl(n); S.tasks.push(t); return t; }
+   171→
+   172→  function walk(n, parent) {
+   173→    var cs = getComputedStyle(n);
+   174→    if (cs.display === 'none') return [];
+   175→    var r = n.getBoundingClientRect();
+   176→    if (!inFirstScreen(r)) return [];
+   177→    var before = S.tasks.length, deps = parent ? [parent] : [], tag = n.tagName;
+   178→    if (n.getAttribute('data-build') === 'mega') { T_('mega', n, r, deps); return S.tasks.slice(before); }
+   179→    if (tag === 'IMG' || tag === 'VIDEO' || tag === 'PICTURE' || tag === 'IFRAME') { T_('image', n, r, deps); return S.tasks.slice(before); }
+   180→    if (tag === 'svg' || tag === 'SVG') { T_(r.width > 40 ? 'image' : 'pop', n, r, deps); return S.tasks.slice(before); }
+   181→    var d = deco(n, cs), fs = parseFloat(cs.fontSize) || 16;
+   182→    if (hasText(n)) {
+   183→      var t = T_(d === 'rect' ? 'rect' : (fs >= 34 ? 'grow' : 'text'), n, r, deps);
+   184→      if (n.matches('.btn-red')) t.restyle = true;
+   185→      return S.tasks.slice(before);
+   186→    }
+   187→    var me = parent;
+   188→    if (d) { me = T_(d === 'rect' ? 'rect' : 'line', n, r, deps); me.edge = d; }
+   189→    walkKids(n, me);
+   190→    return S.tasks.slice(before);
+   191→  }
+   192→  function walkKids(n, me) {
+   193→    var kids = Array.prototype.slice.call(n.children).filter(function (k) { return k.tagName !== 'BR'; }), i = 0;
+   194→    while (i < kids.length) {
+   195→      var j = i + 1;
+   196→      while (j < kids.length && gkey(kids[j]) === gkey(kids[i]) && similar(kids[i], kids[j])) j++;
+   197→      if (j - i >= 2) group(kids.slice(i, j), me); else walk(kids[i], me);
+   198→      i = j;
+   199→    }
+   200→  }
+   201→  /* 一組重複元件：第一個正常做，其他用「拖曳複製」 */
+   202→  function group(list, parent) {
+   203→    var mt = walk(list[0], parent);
+   204→    if (!mt.length) { list.slice(1).forEach(function (k) { walk(k, parent); }); return; }
+   205→    list.slice(1).forEach(function (k) {
+   206→      var r = k.getBoundingClientRect();
+   207→      if (!inFirstScreen(r)) return;
+   208→      var t = T_('dup', k, r, mt.concat(parent ? [parent] : []));
+   209→      t.master = list[0];
+   210→    });
+   211→  }
+   212→  function collect() {
+   213→    S.tasks = [];
+   214→    var roots = Array.prototype.slice.call(document.querySelectorAll('[data-build]'));
+   215→    var used = [];
+   216→    roots.forEach(function (rt) {
+   217→      if (used.indexOf(rt) > -1) return;
+   218→      var r = rt.getBoundingClientRect();
+   219→      if (!inFirstScreen(r)) { touch(rt).style.visibility = 'visible'; return; }
+   220→      /* 相鄰、外觀一樣的幾個區塊（例如三個數據）也當成一組重複元件 */
+   221→      var run = [rt], nx = rt.nextElementSibling;
+   222→      while (nx && nx.hasAttribute('data-build') && gkey(nx) === gkey(rt) && similar(rt, nx)) { run.push(nx); nx = nx.nextElementSibling; }
+   223→      run.forEach(function (x) { used.push(x); });
+   224→      if (run.length > 1) group(run, null); else walk(rt, null);
+   225→    });
+   226→    /* 先做上面的，再做下面的；大區塊和參考線優先 */
+   227→    S.tasks.forEach(function (t, k) { t.order = Math.round(t.r.top / 70) * 10000 + t.r.left + k * .001; });
+   228→    S.tasks.sort(function (a, b) { return a.order - b.order; });
+   229→  }
+   230→
+   231→  /* ---- 畫面上的施工輔助：尺規、參考線、框 ---- */
+   232→  function makeBox(parent, r, cls) {
+   233→    var b = el('div', 'sw-box' + (cls ? ' ' + cls : ''), '<i></i><i></i><i></i><i></i><em></em>');
+   234→    b.style.left = r.left + 'px'; b.style.top = r.top + 'px'; b.style.width = (r.width || 0) + 'px'; b.style.height = (r.height || 0) + 'px';
+   235→    parent.appendChild(b); return b;
+   236→  }
+   237→  function killBox(b, delay) { setTimeout(function () { b.classList.add('gone'); setTimeout(function () { b.remove(); }, 500); }, delay || 0); }
+   238→  function sizeBox(b, x, y, w, h) { b.style.left = x + 'px'; b.style.top = y + 'px'; b.style.width = Math.max(0, w) + 'px'; b.style.height = Math.max(0, h) + 'px'; b.querySelector('em').textContent = Math.round(w) + ' × ' + Math.round(h); }
+   239→  function addRulers() {
+   240→    var top = el('div', 'sw-ruler'), left = el('div', 'sw-ruler v'), html = '', vh = '';
+   241→    for (var x = 100; x < innerWidth; x += 100) html += '<span style="left:' + x + 'px">' + x + '</span>';
+   242→    for (var y = 100; y < innerHeight; y += 100) vh += '<span style="top:' + y + 'px">' + y + '</span>';
+   243→    top.innerHTML = html; left.innerHTML = vh;
+   244→    S.layer.appendChild(top); S.layer.appendChild(left); S.guides.push(top, left);
+   245→    requestAnimationFrame(function () { top.classList.add('on'); left.classList.add('on'); });
+   246→  }
+   247→  function hudUpdate() {
+   248→    if (!S.hud) return;
+   249→    S.hud.querySelector('.cnt').textContent = S.done + ' / ' + S.total + ' 圖層';
+   250→    S.hud.querySelector('.bar i').style.width = (S.total ? S.done / S.total * 100 : 0) + '%';
+   251→    var w = S.hud.querySelector('.who'); if (w) w.textContent = S.agents.length + ' 位 agent';
+   252→  }
+   253→  function makeHud() {
+   254→    var dots = '';
+   255→    for (var i = 0; i < 4; i++) dots += '<i style="background:' + ROSTER[i].c + '"></i>';
+   256→    var h = el('div', 'sw-hud', '<span class="dots">' + dots + '</span><span class="who"></span><span class="bar"><i></i></span><span class="cnt">0 / 0 圖層</span><button type="button" class="skip">略過</button><button type="button" class="never" title="之後進入頁面都不再播放開場">不再播放</button>');
+   257→    h.setAttribute('role', 'status');
+   258→    document.body.appendChild(h);
+   259→    h.querySelector('.skip').addEventListener('click', function () { finish(true); });
+   260→    h.querySelector('.never').addEventListener('click', function () { P.store.set('popolab-intro', 'off'); finish(true); });
+   261→    return h;
+   262→  }
+   263→
+   264→  /* ---- 文字的位移與縮放（不改內容，版面不會跳動） ---- */
+   265→  /* 一般元素用 transform；行內元素或本來就有 transform 的元素，改用相對位移 */
+   266→  function mover(n) {
+   267→    var cs = getComputedStyle(n);
+   268→    var mode = (cs.display === 'inline' || cs.transform !== 'none') ? (cs.position === 'static' ? 'rel' : 'fade') : 'tf';
+   269→    touch(n).style.transition = 'none';
+   270→    return {
+   271→      mode: mode,
+   272→      set: function (x, y, sc) {
+   273→        if (mode === 'tf') { n.style.transformOrigin = '0 0'; n.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; }
+   274→        else if (mode === 'rel') { n.style.position = 'relative'; n.style.left = x.toFixed(1) + 'px'; n.style.top = y.toFixed(1) + 'px'; }
+   275→      },
+   276→      clear: function () { n.style.transform = ''; n.style.transformOrigin = ''; n.style.position = ''; n.style.left = ''; n.style.top = ''; n.style.transition = ''; }
+   277→    };
+   278→  }
+   279→
+   280→  /* ---- 每種圖層的做法 ---- */
+   281→  var DO = {
+   282→    rect: function (a, t, done) {
+   283→      var r = t.r;
+   284→      a.setTool('cross');
+   285→      a.go(r.left, r.top, a.dash(r.left, r.top), null, function () {
+   286→        var b = makeBox(S.layer, { left: r.left, top: r.top, width: 0, height: 0 }); S.boxes.push(b);
+   287→        a.go(r.right, r.bottom, Math.max(260, Math.min(520, (r.width + r.height) / 2.6)), function (p) { var e = ease(p); sizeBox(b, r.left, r.top, r.width * e, r.height * e); }, function () {
+   288→          b.classList.add('wire');
+   289→          setTimeout(function () {
+   290→            showEl(t.el, 'sw-in');
+   291→            if (!t.restyle) { killBox(b, 140); done(); return; }
+   292→            /* 紅色按鈕：先是灰的，點一下才變紅 */
+   293→            t.el.style.filter = 'grayscale(1) brightness(.55)'; t.el.style.transition = 'filter .35s ease';
+   294→            a.setTool('arrow');
+   295→            var cx = r.left + r.width * .5, cy = r.top + r.height * .5;
+   296→            a.go(cx, cy, 260, null, function () {
+   297→              a.press(); ripple(cx, cy, '#ff1e2d');
+   298→              t.el.style.filter = ''; killBox(b, 120);
+   299→              setTimeout(done, 200);
+   300→            });
+   301→          }, 140);
+   302→        });
+   303→      });
+   304→    },
+   305→    image: function (a, t, done) {
+   306→      var r = t.r;
+   307→      a.setTool('cross');
+   308→      a.go(r.left, r.top, a.dash(r.left, r.top), null, function () {
+   309→        var b = makeBox(S.layer, { left: r.left, top: r.top, width: 0, height: 0 }); S.boxes.push(b);
+   310→        a.go(r.right, r.bottom, Math.max(320, Math.min(620, (r.width + r.height) / 2.4)), function (p) { var e = ease(p); sizeBox(b, r.left, r.top, r.width * e, r.height * e); }, function () {
+   311→          b.classList.add('wire');
+   312→          t.el.style.clipPath = 'inset(0 0 100% 0)'; showEl(t.el);
+   313→          /* 由上往下掃出來 */
+   314→          a.go(r.right, r.top, 160, null, function () {
+   315→            a.go(r.right, r.bottom, Math.max(500, Math.min(900, r.height * 1.4)), function (p) { t.el.style.clipPath = 'inset(0 0 ' + ((1 - p) * 100).toFixed(1) + '% 0)'; }, function () {
+   316→              t.el.style.clipPath = ''; killBox(b, 100); done();
+   317→            }, true);
+   318→          });
+   319→        });
+   320→      });
+   321→    },
+   322→    text: function (a, t, done) {
+   323→      var r = t.r, n = t.el, mv = mover(n);
+   324→      var sc0 = mv.mode === 'tf' ? rand(.55, .75) : 1;
+   325→      var dx = mv.mode === 'fade' ? 0 : rand(-80, 80), dy = mv.mode === 'fade' ? 0 : rand(30, 64) * (Math.random() < .5 ? -1 : 1);
+   326→      var sx = r.left + dx, sy = r.top + dy, w0 = r.width * sc0, h0 = r.height * sc0;
+   327→      a.setTool('cross');
+   328→      a.go(sx, sy, a.dash(sx, sy), null, function () {
+   329→        var b = makeBox(S.layer, { left: sx, top: sy, width: 0, height: 0 }, 'text'); S.boxes.push(b);
+   330→        a.go(sx + w0, sy + h0, 220, function (p) { var e = ease(p); sizeBox(b, sx, sy, w0 * e, h0 * e); }, function () {
+   331→          /* 文字直接被建立出來 */
+   332→          mv.set(dx, dy, sc0); showEl(n, 'sw-in');
+   333→          if (mv.mode === 'fade') { killBox(b, 200); setTimeout(done, 200); return; }
+   334→          /* 換成移動游標，抓住文字拖回正確位置，同時拉伸到正確大小 */
+   335→          a.setTool('move');
+   336→          a.go(sx + w0 * .5, sy + h0 * .5, 150, null, function () {
+   337→            a.press();
+   338→            a.go(r.left + r.width * .5, r.top + r.height * .5, Math.max(420, Math.min(820, Math.hypot(dx, dy) * 6)), function (p) {
+   339→              var e = ease(p), k = 1 - e, sc = sc0 + (1 - sc0) * e;
+   340→              mv.set(dx * k, dy * k, sc);
+   341→              sizeBox(b, r.left + dx * k, r.top + dy * k, r.width * sc, r.height * sc);
+   342→            }, function () { mv.clear(); killBox(b, 100); done(); });
+   343→          });
+   344→        });
+   345→      });
+   346→    },
+   347→    /* 大標題：先小小地直接出現，再換成縮放游標拖曳右下角放大到正確大小 */
+   348→    grow: function (a, t, done, mega) {
+   349→      var r = t.r, n = t.el, cs = getComputedStyle(n), fs = parseFloat(cs.fontSize) || 40, mv = mover(n);
+   350→      if (mv.mode !== 'tf') { DO.text(a, t, done); return; }
+   351→      var s0 = mega ? .15 : Math.max(.24, Math.min(.6, 18 / fs));
+   352→      a.setTool('cross');
+   353→      a.go(r.left, r.top, a.dash(r.left, r.top), null, function () {
+   354→        var b = makeBox(S.layer, { left: r.left, top: r.top, width: 0, height: 0 }, 'text'); S.boxes.push(b);
+   355→        a.go(r.left + r.width * s0, r.top + r.height * s0, 260, function (p) { var e = ease(p); sizeBox(b, r.left, r.top, r.width * s0 * e, r.height * s0 * e); }, function () {
+   356→          mv.set(0, 0, s0); showEl(n, 'sw-in');
+   357→          var cx = r.left + r.width * s0, cy = r.top + r.height * s0;
+   358→          a.setTool('resize');
+   359→          a.go(cx, cy, 160, null, function () {
+   360→            a.press();
+   361→            a.go(r.right, r.bottom, mega ? 1300 : Math.max(650, Math.min(1100, (r.width + r.height) * 1.2)), function (p) {
+   362→              var e = ease(p), sc = s0 + (1 - s0) * e;
+   363→              mv.set(0, 0, sc); sizeBox(b, r.left, r.top, r.width * sc, r.height * sc);
+   364→            }, function () { mv.clear(); killBox(b, 120); done(); });
+   365→          });
+   366→        });
+   367→      });
+   368→    },
+   369→    mega: function (a, t, done) { DO.grow(a, t, done, true); },
+   370→    /* 鋼筆：點起點，拉出橡皮筋線，點終點 */
+   371→    line: function (a, t, done) {
+   372→      var r = t.r, y = t.edge === 'line-bottom' ? r.bottom - 1 : r.top;
+   373→      a.setTool('pen');
+   374→      a.go(r.left, y, a.dash(r.left, y), null, function () {
+   375→        a.press();
+   376→        var ln = el('div', 'sw-pen'); ln.style.left = r.left + 'px'; ln.style.top = y + 'px'; ln.style.width = '0px'; S.layer.appendChild(ln); S.boxes.push(ln);
+   377→        var dot = el('div', 'sw-dot'); dot.style.left = r.left + 'px'; dot.style.top = y + 'px'; S.layer.appendChild(dot); S.boxes.push(dot);
+   378→        a.go(r.right, y, Math.max(300, Math.min(700, r.width / 2.4)), function (p) { ln.style.width = (r.width * ease(p)) + 'px'; }, function () {
+   379→          a.press(); showEl(t.el);
+   380→          var d2 = el('div', 'sw-dot'); d2.style.left = r.right + 'px'; d2.style.top = y + 'px'; S.layer.appendChild(d2); S.boxes.push(d2);
+   381→          killBox(ln, 250); killBox(dot, 250); killBox(d2, 250); done();
+   382→        });
+   383→      });
+   384→    },
+   385→    /* 小圖示：點一下彈出來 */
+   386→    pop: function (a, t, done) {
+   387→      var r = t.r, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+   388→      a.setTool('arrow');
+   389→      a.go(cx, cy, a.dash(cx, cy), null, function () { a.press(); showEl(t.el, 'sw-pop'); setTimeout(done, 160); });
+   390→    },
+   391→    /* 拖曳複製：選取第一個，按住拖到下一個位置，放開後改字 */
+   392→    dup: function (a, t, done) {
+   393→      var m = t.master.getBoundingClientRect(), r = t.r;
+   394→      var gx = m.left + m.width * .5, gy = m.top + m.height * .5;
+   395→      a.setTool('arrow');
+   396→      a.go(gx, gy, a.dash(gx, gy), null, function () {
+   397→        var sel = makeBox(S.layer, m, 'sel'); sel.querySelector('em').textContent = '⌥ 拖曳複製'; S.boxes.push(sel);
+   398→        setTimeout(function () {
+   399→          a.setTool('dup'); a.press();
+   400→          var ghost = makeBox(S.layer, m, 'ghost'); S.boxes.push(ghost);
+   401→          var dx = r.left - m.left, dy = r.top - m.top;
+   402→          var meas = el('div', 'sw-meas'); S.layer.appendChild(meas); S.boxes.push(meas);
+   403→          a.go(gx + dx, gy + dy, Math.max(380, Math.min(700, Math.hypot(dx, dy) * 1.1)), function (p) {
+   404→            var e = ease(p), x = m.left + dx * e, y = m.top + dy * e;
+   405→            ghost.style.left = x + 'px'; ghost.style.top = y + 'px';
+   406→            /* 紅色間距量測 */
+   407→            var horiz = Math.abs(dx) >= Math.abs(dy);
+   408→            if (horiz) { var gap = Math.max(0, x - m.right); meas.style.cssText = 'left:' + m.right + 'px;top:' + (m.top + m.height / 2) + 'px;width:' + gap + 'px;height:1px'; meas.setAttribute('data-v', Math.round(gap)); }
+   409→            else { var gp = Math.max(0, y - m.bottom); meas.style.cssText = 'left:' + (m.left + m.width / 2) + 'px;top:' + m.bottom + 'px;width:1px;height:' + gp + 'px'; meas.setAttribute('data-v', Math.round(gp)); }
+   410→          }, function () {
+   411→            showEl(t.el, 'sw-in');
+   412→            killBox(ghost, 60); killBox(sel, 60); killBox(meas, 300);
+   413→            a.setTool('arrow'); setTimeout(done, 120);
+   414→          });
+   415→        }, 160);
+   416→      });
+   417→    }
+   418→  };
+   419→  function ripple(x, y, c) { var rp = el('div', 'sw-ripple'); rp.style.left = x + 'px'; rp.style.top = y + 'px'; rp.style.borderColor = c; S.layer.appendChild(rp); setTimeout(function () { rp.remove(); }, 900); }
+   420→
+   421→  /* ---- 一開始先從尺規拉兩條紅色參考線 ---- */
+   422→  function guideTask(a, vertical, pos, done) {
+   423→    a.setTool('arrow');
+   424→    var sx = vertical ? pos : 9, sy = vertical ? 9 : pos;
+   425→    a.go(vertical ? pos : 9, vertical ? 9 : pos, a.dash(sx, sy), null, function () {
+   426→      a.press();
+   427→      var g = el('div', 'sw-guide on red ' + (vertical ? 'v' : 'h')), lab = el('div', 'sw-gl');
+   428→      if (vertical) { g.style.left = pos + 'px'; } else { g.style.top = pos + 'px'; }
+   429→      S.layer.appendChild(g); S.layer.appendChild(lab); S.guides.push(g, lab);
+   430→      var from = vertical ? { x: pos, y: 9 } : { x: 9, y: pos };
+   431→      var to = vertical ? { x: pos, y: innerHeight * .55 } : { x: innerWidth * .45, y: pos };
+   432→      a.go(to.x, to.y, 520, function (p) {
+   433→        lab.style.left = (a.x + 14) + 'px'; lab.style.top = (a.y + 10) + 'px';
+   434→        lab.textContent = vertical ? 'X ' + Math.round(pos) : 'Y ' + Math.round(pos);
+   435→      }, function () { setTimeout(function () { lab.remove(); }, 400); done(); });
+   436→    });
+   437→  }
+   438→
+   439→  function interrupt(e) {
+   440→    if (e.type === 'keydown' && e.key !== 'Escape') return;
+   441→    if (e.type === 'scroll' && window.scrollY < 40) return;
+   442→    finish(true);
+   443→  }
+   444→  function bindInterrupts(on) {
+   445→    var f = on ? 'addEventListener' : 'removeEventListener';
+   446→    window[f]('wheel', interrupt, { passive: true });
+   447→    window[f]('touchmove', interrupt, { passive: true });
+   448→    window[f]('keydown', interrupt);
+   449→    window[f]('scroll', interrupt, { passive: true });
+   450→  }
+   451→
+   452→  /* ---- 派工：每個閒著的游標挑「離自己最近、可以開工」的圖層 ---- */
+   453→  function pickTask(a) {
+   454→    var best = null, bd = 1e9, seen = 0;
+   455→    for (var i = 0; i < S.tasks.length && seen < 7; i++) {
+   456→      var t = S.tasks[i];
+   457→      if (t.taken || t.done) continue;
+   458→      var ok = true;
+   459→      for (var j = 0; j < t.deps.length; j++) if (!t.deps[j].done) { ok = false; break; }
+   460→      if (!ok) continue;
+   461→      seen++;
+   462→      var d = Math.hypot(t.r.left - a.x, t.r.top - a.y) + i * 18;
+   463→      if (d < bd) { bd = d; best = t; }
+   464→    }
+   465→    return best;
+   466→  }
+   467→  function work(a) {
+   468→    if (S.finished) return;
+   469→    var t = pickTask(a);
+   470→    if (!t) {
+   471→      if (S.done >= S.total) { complete(); return; }
+   472→      a.task = null; setTimeout(function () { work(a); }, 90); return;
+   473→    }
+   474→    t.taken = true; a.task = t;
+   475→    try {
+   476→      DO[t.type](a, t, function () {
+   477→        if (t.done) return;
+   478→        t.done = true; S.done++; hudUpdate(); a.task = null; a.setTool('arrow');
+   479→        a.go(a.x + rand(-50, 50), a.y + rand(14, 50), 180, null, function () { work(a); });
+   480→      });
+   481→    } catch (err) { t.done = true; S.done++; showEl(t.el); work(a); }
+   482→  }
+   483→
+   484→  function buildLoop(now) {
+   485→    if (!S.running) return;
+   486→    var dt = Math.min(50, now - (S.last || now)); S.last = now;
+   487→    S.agents.forEach(function (a) { if (!a.stepSeg(dt) && !a.task) a.idle(dt, now); a.draw(); });
+   488→    S.raf = requestAnimationFrame(buildLoop);
+   489→  }
+   490→  function start() {
+   491→    window.POPOLAB_SWARM_STARTED = true;
+   492→    Live.stop(true);
+   493→    root.classList.add('swarm-pending');
+   494→    S.finished = false; S.done = 0; S.boxes = []; S.guides = []; S.touched = [];
+   495→    S.layer = el('div', 'sw-layer'); S.layer.setAttribute('aria-hidden', 'true');
+   496→    document.body.appendChild(S.layer);
+   497→    collect();
+   498→    var count = small ? 8 : 18;
+   499→    S.agents = [];
+   500→    for (var i = 0; i < count; i++) S.agents.push(new Agent(S.layer, i));
+   501→    S.total = S.tasks.length + 2;
+   502→    S.hud = makeHud(); hudUpdate();
+   503→    addRulers();
+   504→    S.t0 = performance.now(); S.running = true; S.last = 0;
+   505→    S.raf = requestAnimationFrame(buildLoop);
+   506→    bindInterrupts(true);
+   507→    /* 參考線：內容的左邊界、第一個大標題的底部 */
+   508→    var pg = document.querySelector('.page'), gx = 56, first = document.querySelector('[data-build="mega"]');
+   509→    if (pg) { var cs = getComputedStyle(pg); gx = pg.getBoundingClientRect().left + parseFloat(cs.paddingLeft); }
+   510→    var gy = first ? first.getBoundingClientRect().bottom - 6 : innerHeight * .4;
+   511→    var ga = S.agents[2], gb = S.agents[5 % count];
+   512→    ga.task = gb.task = { type: 'guide' };
+   513→    var gdone = function (a) { return function () { S.done++; hudUpdate(); a.task = null; a.setTool('arrow'); work(a); }; };
+   514→    setTimeout(function () { guideTask(ga, true, gx, gdone(ga)); }, 120);
+   515→    setTimeout(function () { guideTask(gb, false, gy, gdone(gb)); }, 260);
+   516→    S.agents.forEach(function (a, k) { if (a !== ga && a !== gb) setTimeout(function () { work(a); }, 60 + k * 28); });
+   517→    S.safety = setTimeout(function () { finish(true); }, 16000);
+   518→  }
+   519→  function complete() {
+   520→    if (S.finished || S.completing) return;
+   521→    S.completing = true;
+   522→    var secs = ((performance.now() - S.t0) / 1000).toFixed(1);
+   523→    if (S.hud) {
+   524→      S.hud.innerHTML = '<span class="dots">' + S.hud.querySelector('.dots').innerHTML + '</span><span>由 ' + S.agents.length + ' 位 agent 在 ' + secs + ' 秒內蓋好 ' + S.total + ' 個圖層</span><button type="button" class="go">上線 ✓</button>';
+   525→      S.hud.querySelector('.go').addEventListener('click', function () { finish(false); });
+   526→    }
+   527→    S.goTimer = setTimeout(function () { finish(false); }, 1400);
+   528→  }
+   529→  function finish(instant) {
+   530→    if (S.finished) return;
+   531→    S.finished = true; S.completing = false;
+   532→    clearTimeout(S.safety); clearTimeout(S.goTimer);
+   533→    bindInterrupts(false);
+   534→    revealAll();
+   535→    S.boxes.forEach(function (b) { killBox(b, 0); });
+   536→    S.guides.forEach(function (g) { g.classList.remove('on'); g.classList.add('gone'); });
+   537→    var guides = S.guides; setTimeout(function () { guides.forEach(function (g) { g.remove(); }); }, 500);
+   538→    if (S.hud) { var h = S.hud; h.classList.add('out'); setTimeout(function () { h.remove(); }, 500); S.hud = null; }
+   539→    S.running = false; cancelAnimationFrame(S.raf);
+   540→    var layer = S.layer, agents = S.agents;
+   541→    agents.forEach(function (a) { a.task = null; a.setTool('arrow'); });
+   542→    if (!P.motionOn()) { agents.forEach(function (a) { a.e.classList.add('fade'); }); setTimeout(function () { layer.remove(); }, 600); return; }
+   543→    /* 有名字的游標留下來，其他的飛走 */
+   544→    var keep = small ? 4 : ROSTER.length;
+   545→    var stay = agents.slice(0, keep), leave = agents.slice(keep);
+   546→    leave.forEach(function (a) { a.clear(); a.go(a.x < innerWidth / 2 ? -90 : innerWidth + 90, a.y + rand(-60, 60), instant ? 380 : 700, null, function () { a.e.remove(); }); });
+   547→    Live.adopt(layer, stay, leave);
+   548→  }
+   549→
+   550→  /* =========================================================
+   551→     2. 常駐游標：跟隨 / 讀字 / 點擊 / 框選
+   552→     ========================================================= */
+   553→  var Live = {
+   554→    on: false, layer: null, fx: null, agents: [], leaving: [], raf: 0, mx: -1, my: -1, lastMove: 0, busy: [],
+   555→    adopt: function (layer, agents, leaving) {
+   556→      this.stop(true);
+   557→      this.layer = layer; layer.className = 'sw-live';
+   558→      this.fx = el('div', 'sw-fx'); this.fx.setAttribute('aria-hidden', 'true'); document.body.appendChild(this.fx);
+   559→      this.agents = agents; this.leaving = leaving || [];
+   560→      var now = performance.now();
+   561→      agents.forEach(function (a) { a.clear(); a.task = null; a.vx = a.vy = 0; a.soft = false; a.anchor = null; a.hopAt = 0; a.next = now + rand(1500, small ? 20000 : 26000); });
+   562→      this.on = true; this.last = 0;
+   563→      var self = this;
+   564→      this.raf = requestAnimationFrame(function t(n) { self.tick(n); if (self.on) self.raf = requestAnimationFrame(t); });
+   565→    },
+   566→    fresh: function () {
+   567→      var layer = el('div', 'sw-live'); layer.setAttribute('aria-hidden', 'true'); document.body.appendChild(layer);
+   568→      var list = [], n = small ? 4 : ROSTER.length;
+   569→      for (var i = 0; i < n; i++) list.push(new Agent(layer, i));
+   570→      this.adopt(layer, list);
+   571→    },
+   572→    stop: function (instant) {
+   573→      this.on = false; cancelAnimationFrame(this.raf);
+   574→      this.clearFx();
+   575→      var l = this.layer, f = this.fx;
+   576→      if (l) { this.agents.forEach(function (a) { a.e.classList.add('fade'); }); setTimeout(function () { l.remove(); }, instant ? 0 : 600); }
+   577→      if (f) setTimeout(function () { f.remove(); }, instant ? 0 : 450);
+   578→      this.layer = null; this.fx = null; this.agents = []; this.leaving = []; this.busy = [];
+   579→    },
+   580→    clearFx: function () {
+   581→      if (!this.fx) return;
+   582→      Array.prototype.forEach.call(this.fx.children, function (c) { c.classList.add('gone'); setTimeout(function () { c.remove(); }, 420); });
+   583→      document.querySelectorAll('.sw-hover').forEach(function (e) { e.classList.remove('sw-hover'); });
+   584→    },
+   585→    interruptAll: function () {
+   586→      if (!this.on) return;
+   587→      var now = performance.now();
+   588→      this.agents.forEach(function (a) { a.cont = null; a.anchor = null; if (a.task) { a.clear(); a.task = null; a.next = now + rand(3000, 10000); } });
+   589→      this.busy = [];
+   590→      this.clearFx();
+   591→    },
+   592→    isBusy: function (e) { for (var i = 0; i < this.busy.length; i++) if (this.busy[i] === e || this.busy[i].contains(e) || e.contains(this.busy[i])) return true; return false; },
+   593→    release: function (a, e, quick) {
+   594→      var i = this.busy.indexOf(e); if (i > -1) this.busy.splice(i, 1);
+   595→      a.task = null; a.anchor = null; a.hopAt = 0;
+   596→      a.next = performance.now() + (quick ? rand(300, 900) : rand(T.restMin, T.restMax));
+   597→      a.recent.unshift(e); if (a.recent.length > 4) a.recent.pop();
+   598→    },
+   599→    inView: function (r, pad) { pad = pad || 0; return r.width > 8 && r.height > 6 && r.top > 72 + pad && r.bottom < innerHeight - 24 - pad && r.left > -2 && r.right < innerWidth + 2; },
+   600→    lines: function (e) {
+   601→      var rg = document.createRange(); rg.selectNodeContents(e);
+   602→      var rs = Array.prototype.slice.call(rg.getClientRects()), lines = [];
+   603→      rs.forEach(function (r) {
+   604→        if (r.width < 2 || r.height < 6) return;
+   605→        for (var i = 0; i < lines.length; i++) {
+   606→          var L = lines[i];
+   607→          if (Math.abs(L.top - r.top) < 6 || (r.top < L.bottom - 4 && r.bottom > L.top + 4)) { L.left = Math.min(L.left, r.left); L.right = Math.max(L.right, r.right); L.top = Math.min(L.top, r.top); L.bottom = Math.max(L.bottom, r.bottom); return; }
+   608→        }
+   609→        lines.push({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+   610→      });
+   611→      var self = this;
+   612→      return lines.filter(function (L) { return L.right - L.left > 60 && self.inView({ width: L.right - L.left, height: L.bottom - L.top, top: L.top, bottom: L.bottom, left: L.left, right: L.right }); })
+   613→                  .sort(function (p, q) { return p.top - q.top; });
+   614→    },
+   615→    /* 收集三種任務的候選目標，依「離這個游標多近」排序 */
+   616→    options: function (a) {
+   617→      var self = this, out = [];
+   618→      [['read', READ_SEL], ['click', CLICK_SEL], ['inspect', INSPECT_SEL]].forEach(function (pair) {
+   619→        document.querySelectorAll(pair[1]).forEach(function (e) {
+   620→          if (e.closest('.sw-hud') || self.isBusy(e) || a.recent.indexOf(e) > -1) return;
+   621→          var r = e.getBoundingClientRect();
+   622→          if (r.bottom < 80 || r.top > innerHeight - 30 || r.width < 8) return;
+   623→          var nx = Math.max(r.left, Math.min(a.x, r.right)), ny = Math.max(r.top, Math.min(a.y, r.bottom));
+   624→          out.push({ type: pair[0], e: e, d: Math.hypot(nx - a.x, ny - a.y) * rand(.85, 1.15) });
+   625→        });
+   626→      });
+   627→      return out.sort(function (p, q) { return p.d - q.d; });
+   628→    },
+   629→    /* ---- 讀一行字：慢慢掃過去，留下反白 ---- */
+   630→    doRead: function (a, e, L) {
+   631→      var self = this, fx = this.fx, h = L.bottom - L.top, y = L.top + h * .5;
+   632→      this.busy.push(e); a.task = 'read';
+   633→      a.go(L.left - 3, y, a.travel(L.left - 3, y), null, function () {
+   634→        var hl = el('div', 'sw-hl');
+   635→        hl.style.cssText = 'left:' + L.left + 'px;top:' + (L.top + 1) + 'px;height:' + (h - 2) + 'px;width:0;background:' + rgba(a.c, .22) + ';box-shadow:inset -2px 0 0 ' + a.c;
+   636→        fx.appendChild(hl);
+   637→        var w = L.right - L.left;
+   638→        a.go(L.right, y, Math.max(900, w / T.readSpeed * 1000), function (p) { hl.style.width = (w * p) + 'px'; }, function () {
+   639→          setTimeout(function () { hl.classList.add('gone'); setTimeout(function () { hl.remove(); }, 900); }, 550);
+   640→          var more = self.lines(e).some(function (l) { return l.top > L.top + 4; }) && Math.random() < .6;
+   641→          a.cont = more ? { e: e, top: L.top } : null;
+   642→          a.go(a.x + rand(6, 20), a.y + rand(6, 16), 350, null, function () { self.release(a, e, more); });
+   643→        }, true);
+   644→      });
+   645→    },
+   646→    /* ---- 點一下按鈕或卡片 ---- */
+   647→    doClick: function (a, e) {
+   648→      var r = e.getBoundingClientRect();
+   649→      if (!this.inView(r)) return false;
+   650→      var x = r.left + r.width * rand(.3, .7), y = r.top + r.height * rand(.35, .65), self = this, fx = this.fx;
+   651→      var host = e.closest('.card') || e;
+   652→      this.busy.push(e); a.task = 'click';
+   653→      a.go(x, y, a.travel(x, y), null, function () {
+   654→        var box = makeBox(fx, r, 'sel'), lab = box.querySelector('em');
+   655→        box.style.borderColor = a.c; lab.style.background = a.c;
+   656→        if (a.c === '#ffffff' || a.c === '#f0a37c') lab.style.color = '#111';
+   657→        var label = (e.getAttribute('aria-label') || e.textContent || '').replace(/\s+/g, ' ').trim();
+   658→        lab.textContent = label ? (label.length > 12 ? label.slice(0, 12) + '…' : label) : 'Click';
+   659→        host.classList.add('sw-hover');
+   660→        setTimeout(function () {
+   661→          if (!self.on) return;
+   662→          a.press();
+   663→          var rp = el('div', 'sw-ripple'); rp.style.left = x + 'px'; rp.style.top = y + 'px'; rp.style.borderColor = a.c; fx.appendChild(rp);
+   664→          setTimeout(function () { rp.remove(); }, 1500);
+   665→        }, 400);
+   666→        setTimeout(function () {
+   667→          host.classList.remove('sw-hover'); box.classList.add('gone'); setTimeout(function () { box.remove(); }, 900);
+   668→          a.go(a.x + rand(-40, 40), a.y + rand(20, 50), 450, null, function () { self.release(a, e); });
+   669→        }, 1600);
+   670→      });
+   671→      return true;
+   672→    },
+   673→    /* ---- 框選一張圖或標題，標出尺寸 ---- */
+   674→    doInspect: function (a, e) {
+   675→      var r = e.getBoundingClientRect();
+   676→      if (!this.inView(r, 4) || r.width > innerWidth * .9) return false;
+   677→      var self = this, fx = this.fx;
+   678→      this.busy.push(e); a.task = 'inspect';
+   679→      a.go(r.left, r.top, a.travel(r.left, r.top), null, function () {
+   680→        var b = makeBox(fx, { left: r.left, top: r.top, width: 0, height: 0 }), lab = b.querySelector('em');
+   681→        b.style.borderColor = a.c; lab.style.background = a.c;
+   682→        if (a.c === '#ffffff' || a.c === '#f0a37c') lab.style.color = '#111';
+   683→        a.go(r.right, r.bottom, Math.max(600, Math.hypot(r.width, r.height) / T.travelSpeed), function (p) {
+   684→          var q = ease(p); b.style.width = (r.width * q) + 'px'; b.style.height = (r.height * q) + 'px';
+   685→          lab.textContent = Math.round(r.width * q) + ' × ' + Math.round(r.height * q);
+   686→        }, function () {
+   687→          setTimeout(function () { b.classList.add('gone'); setTimeout(function () { b.remove(); }, 900); self.release(a, e); }, 1200);
+   688→        });
+   689→      });
+   690→      return true;
+   691→    },
+   692→    startTask: function (a) {
+   693→      /* 1. 剛讀完的段落還有下一行：優先接著讀 */
+   694→      var c = a.cont; a.cont = null;
+   695→      if (c && document.contains(c.e) && !this.isBusy(c.e)) {
+   696→        var ls = this.lines(c.e);
+   697→        for (var i = 0; i < ls.length; i++) if (ls[i].top > c.top + 4) { this.doRead(a, c.e, ls[i]); return true; }
+   698→      }
+   699→      /* 2. 否則挑附近的東西：越近越優先，保留一點隨機 */
+   700→      var opts = this.options(a);
+   701→      for (var k = 0; k < opts.length && k < 10; k++) {
+   702→        if (k < opts.length - 1 && Math.random() < .3) continue;
+   703→        var o = opts[k];
+   704→        if (o.type === 'read') {
+   705→          var lines = this.lines(o.e);
+   706→          if (!lines.length) continue;
+   707→          lines.sort(function (p, q) { return Math.abs((p.top + p.bottom) / 2 - a.y) - Math.abs((q.top + q.bottom) / 2 - a.y); });
+   708→          this.doRead(a, o.e, lines[0]); return true;
+   709→        }
+   710→        if (o.type === 'click' && this.doClick(a, o.e)) return true;
+   711→        if (o.type === 'inspect' && this.doInspect(a, o.e)) return true;
+   712→      }
+   713→      return false;
+   714→    },
+   715→    /* 待機：在做完事的地方小幅度、慢慢地飄 */
+   716→    drift: function (a, now, dt) {
+   717→      if (!a.anchor) a.anchor = { x: Math.max(30, Math.min(innerWidth - 60, a.x)), y: Math.max(90, Math.min(innerHeight - 50, a.y)) };
+   718→      var hx = a.anchor.x + Math.cos(now / 1500 * a.w + a.ph) * 34;
+   719→      var hy = a.anchor.y + Math.sin(now / 1900 * a.w + a.ph * 1.3) * 24;
+   720→      a.vx += (hx - a.x) * .0012 * dt; a.vy += (hy - a.y) * .0012 * dt;
+   721→      a.vx *= .88; a.vy *= .88;
+   722→      a.x += a.vx; a.y += a.vy;
+   723→    },
+   724→    tick: function (now) {
+   725→      var dt = Math.min(40, now - (this.last || now)); this.last = now;
+   726→      this.leaving.forEach(function (a) { a.stepSeg(dt); a.draw(); });
+   727→      var mouseActive = fine && this.mx >= 0 && now - this.lastMove < 2800;
+   728→      var running = 0, n = this.agents.length, i, a;
+   729→      for (i = 0; i < n; i++) if (this.agents[i].task) running++;
+   730→      for (i = 0; i < n; i++) {
+   731→        a = this.agents[i];
+   732→        if (a.task) { a.stepSeg(dt); a.draw(); continue; }
+   733→        if (T.tasks && now >= a.next) {
+   734→          if (running < T.maxBusy && this.startTask(a)) { running++; a.stepSeg(dt); a.draw(); continue; }
+   735→          a.next = now + rand(2000, 6000);
+   736→        }
+   737→        if (mouseActive) {
+   738→          /* 滑鼠在動：圍著滑鼠跑 */
+   739→          if (a.seg || a.queue.length) a.clear();
+   740→          a.anchor = null;
+   741→          var ang = a.ph + now / 1000 * .55 * a.w;
+   742→          var tx = this.mx + Math.cos(ang) * a.r + 10, ty = this.my + Math.sin(ang) * a.r * .8 + 14;
+   743→          a.vx += (tx - a.x) * .0016 * dt; a.vy += (ty - a.y) * .0016 * dt;
+   744→          for (var j = 0; j < n; j++) {
+   745→            if (j === i) continue;
+   746→            var b = this.agents[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+   747→            if (d2 < 900 && d2 > .01) { var f = (900 - d2) / 900 * .06 * dt, d = Math.sqrt(d2); a.vx += dx / d * f; a.vy += dy / d * f; }
+   748→          }
+   749→          a.vx *= .9; a.vy *= .9;
+   750→          var sp = Math.hypot(a.vx, a.vy);
+   751→          if (sp > T.followMax) { a.vx *= T.followMax / sp; a.vy *= T.followMax / sp; }
+   752→          a.x += a.vx; a.y += a.vy;
+   753→        } else {
+   754→          /* 滑鼠停著：在原地慢慢飄 */
+   755→          if (a.seg || a.queue.length) a.stepSeg(dt);
+   756→          else this.drift(a, now, dt);
+   757→        }
+   758→        a.draw();
+   759→      }
+   760→    }
+   761→  };
+   762→
+   763→  window.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') { Live.mx = e.clientX; Live.my = e.clientY; Live.lastMove = performance.now(); } }, { passive: true });
+   764→  document.addEventListener('mouseleave', function () { Live.lastMove = 0; });
+   765→  window.addEventListener('scroll', function () { Live.interruptAll(); }, { passive: true });
+   766→  window.addEventListener('resize', function () { Live.interruptAll(); small = window.innerWidth < 820; });
+   767→  document.addEventListener('visibilitychange', function () {
+   768→    if (document.hidden) { if (Live.on) { cancelAnimationFrame(Live.raf); Live._paused = true; } }
+   769→    else if (Live._paused && Live.on) { Live._paused = false; Live.last = 0; Live.raf = requestAnimationFrame(function t(n) { Live.tick(n); if (Live.on) Live.raf = requestAnimationFrame(t); }); }
+   770→  });
+   771→  document.addEventListener('popolab:motion', function (e) {
+   772→    if (!e.detail.on) { if (S.running && !S.finished) finish(true); Live.stop(); }
+   773→    else if (!Live.on) Live.fresh();
+   774→  });
+   775→
+   776→  /* ---------- 進入點 ---------- */
+   777→  function boot() {
+   778→    if (shouldBuild()) {
+   779→      var go = function () { if (!S.running && !S.finished) start(); };
+   780→      if (document.fonts && document.fonts.ready) Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 900); })]).then(go);
+   781→      else go();
+   782→    } else {
+   783→      revealAll();
+   784→      if (P.motionOn()) Live.fresh();
+   785→    }
+   786→  }
+   787→  window.POPOLAB_SWARM = {
+   788→    replay: function () {
+   789→      P.store.set('popolab-intro', 'on');
+   790→      if (!P.motionOn()) return;
+   791→      Live.stop(true);
+   792→      S.running = false; S.finished = false;
+   793→      (function wait(n) { if (window.scrollY < 10 || n > 40) setTimeout(start, 200); else { window.scrollTo(0, 0); setTimeout(function () { wait(n + 1); }, 50); } })(0);
+   794→    }
+   795→  };
+   796→  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+   797→})();
+   798→

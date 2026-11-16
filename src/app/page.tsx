@@ -5,10 +5,14 @@ import { SiteProvider, useSite } from "@/components/site/site-context";
 import { SiteHeader } from "@/components/site/site-header";
 import { Hero } from "@/components/site/hero";
 import { WorkSection } from "@/components/site/work-section";
+import { NumbersSection } from "@/components/site/numbers-section";
+import { CraftSection } from "@/components/site/craft-section";
+import { JourneySection } from "@/components/site/journey-section";
 import { ContactSection } from "@/components/site/contact-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { EditToolbar } from "@/components/site/edit-toolbar";
 import { CustomCursor } from "@/components/site/cursor";
+import { Swarm } from "@/components/site/swarm";
 import { ScrollProgress } from "@/components/site/scroll-progress";
 import { Marquee } from "@/components/site/marquee";
 
@@ -30,12 +34,16 @@ function PageBody() {
         <Hero />
         <Marquee variant="red" words={words} />
         <WorkSection />
+        <NumbersSection />
+        <CraftSection />
         <Marquee variant="ghost" reverse words={words} />
+        <JourneySection />
         <ContactSection />
       </main>
 
       <SiteFooter />
       <EditToolbar />
+      <Swarm />
       <CustomCursor />
 
       {/* While Edit Mode is on, keep links clickable without navigating away */}

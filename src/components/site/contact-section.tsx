@@ -68,6 +68,31 @@ export function ContactSection() {
             </Rv>
           ))}
         </Rv>
+
+        {/* POPOLAB-style tilted character card (GTA VI edition). */}
+        <Rv className="tilt-wrap" delay={200}>
+          <a
+            className="tilt-card"
+            href={c.ctaHref}
+            target={c.ctaHref.startsWith("http") ? "_blank" : undefined}
+            rel="noopener noreferrer"
+            aria-label="Contact card — open to work"
+            onClick={(e) => {
+              if (editing || c.ctaHref === "#") e.preventDefault();
+            }}
+          >
+            <div className="tc-top">
+              <span className="label">
+                <b>GTA VI</b> / me &amp; Ria
+              </span>
+              <span className="label">Status / <b>open to work</b></span>
+            </div>
+            <img src={c.tiltImg} alt={c.tiltImgAlt} width={800} height={1067} loading="lazy" />
+            <span className="tc-title font-display">
+              <Ed p="contact.tiltTitle" />
+            </span>
+          </a>
+        </Rv>
       </div>
 
       <Rv className="support">

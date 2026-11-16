@@ -57,8 +57,38 @@ function Scramble({ text, active }: { text: string; active: boolean }) {
   );
 }
 
+const NAV = [
+  { href: "#work", label: "Work" },
+  { href: "#numbers", label: "Numbers" },
+  { href: "#craft", label: "Craft" },
+  { href: "#journey", label: "Journey" },
+  { href: "#contact", label: "Contact" },
+];
+
 export function SiteHeader() {
   const { content, editing, setEditing, motion, toggleMotion, mounted } = useSite();
+
+  // POPOLAB-style scroll spy: the red dot marks the section in view.
+  const [active, setActive] = useState<string>("");
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const links = NAV.map((n) => ({ n, el: document.querySelector<HTMLElement>(n.href) })).filter(
+      (x): x is { n: { href: string; label: string }; el: HTMLElement } => !!x.el,
+    );
+    if (!links.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setActive(`#${e.target.id}`);
+          }
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" },
+    );
+    links.forEach(({ el }) => io.observe(el));
+    return () => io.disconnect();
+  }, [mounted]);
 
   return (
     <header className="site-header">
@@ -76,20 +106,16 @@ export function SiteHeader() {
         </a>
 
         <nav className="nav" aria-label="Main menu">
-          <a href="#work" onClick={(e) => editing && e.preventDefault()}>
-            <Scramble text="Work" active={motion && !editing} />
-          </a>
-          <a href="#contact" onClick={(e) => editing && e.preventDefault()}>
-            <Scramble text="Contact" active={motion && !editing} />
-          </a>
-          <a
-            href="https://github.com/wahyubudiprastowo"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => editing && e.preventDefault()}
-          >
-            <Scramble text="GitHub ↗" active={motion && !editing} />
-          </a>
+          {NAV.map((n) => (
+            <a
+              key={n.href}
+              href={n.href}
+              className={cn(active === n.href && "on")}
+              onClick={(e) => editing && e.preventDefault()}
+            >
+              <Scramble text={n.label} active={motion && !editing} />
+            </a>
+          ))}
         </nav>
 
         <div className="hd-right">
@@ -118,8 +144,18 @@ export function SiteHeader() {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
             </svg>
-            <span className="tx">{editing ? "Exit" : "Edit Mode"}</span>
+            <span className="tx">{editing ? "Exit" : "Edit"}</span>
           </button>
+
+          <a
+            className="hd-cta"
+            href="https://github.com/wahyubudiprastowo"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => editing && e.preventDefault()}
+          >
+            <span className="tx">Hire me</span> <span aria-hidden="true">&#8599;</span>
+          </a>
         </div>
       </div>
     </header>

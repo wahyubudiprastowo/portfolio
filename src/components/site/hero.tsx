@@ -6,12 +6,13 @@ import { Ed } from "./ed";
 import { Ast } from "./ico";
 import { cn } from "@/lib/utils";
 
-/** Statistic number with a count-up animation once visible. */
+/** Statistic number with a count-up animation once visible (supports decimals). */
 function CountNum({ target }: { target: string }) {
   const { motion, mounted } = useSite();
   const ref = useRef<HTMLSpanElement>(null);
   const [n, setN] = useState(0);
-  const num = parseInt(target.replace(/[^\d]/g, ""), 10) || 0;
+  const num = parseFloat(target.replace(/[^\d.]/g, "")) || 0;
+  const decimals = (target.split(".")[1] || "").length;
   const active = mounted && motion;
 
   useEffect(() => {
@@ -30,7 +31,7 @@ function CountNum({ target }: { target: string }) {
         const tick = (t: number) => {
           const p = Math.min(1, (t - t0) / dur);
           const eased = 1 - Math.pow(1 - p, 3);
-          setN(Math.round(num * eased));
+          setN(num * eased);
           if (p < 1) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
@@ -45,7 +46,7 @@ function CountNum({ target }: { target: string }) {
 
   return (
     <span ref={ref} className="n">
-      {shown}
+      {decimals ? shown.toFixed(decimals) : Math.round(shown)}
     </span>
   );
 }
@@ -57,8 +58,7 @@ export function Hero() {
   const animate = mounted && motion && !editing;
   const [typed, setTyped] = useState(full);
 
-  // Typewriter effect for the name; text is fully state-driven so it is
-  // safe from re-renders in the middle of the animation.
+  // Typewriter effect for the name; state-driven so re-renders are safe.
   useEffect(() => {
     if (!animate) {
       const id = requestAnimationFrame(() => setTyped(full));
@@ -73,7 +73,7 @@ export function Hero() {
     return () => clearInterval(iv);
   }, [full, animate]);
 
-  // Giant background word drifts sideways as the page scrolls (parallax).
+  // Giant gradient word drifts sideways as the page scrolls (parallax).
   const megaRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     if (!mounted || !motion || editing) return;
@@ -97,21 +97,6 @@ export function Hero() {
     };
   }, [mounted, motion, editing]);
 
-  // 3D tilt for the polaroid photo card.
-  const figRef = useRef<HTMLElement>(null);
-  const tiltActive = mounted && motion && !editing;
-  const onTilt = (e: React.MouseEvent) => {
-    if (!tiltActive || !figRef.current) return;
-    const el = figRef.current;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    el.style.transform = `perspective(700px) rotateX(${(-py * 7).toFixed(2)}deg) rotateY(${(px * 7).toFixed(2)}deg) rotate(2.4deg) scale(1.03)`;
-  };
-  const onTiltEnd = () => {
-    if (figRef.current) figRef.current.style.transform = "";
-  };
-
   const c = content;
   const isTyping = typed.length < full.length;
 
@@ -122,13 +107,13 @@ export function Hero() {
       </p>
 
       <div className="hero-left">
-        <span className="hello intro d1">
+        <span className="hello intro d1 font-hand">
           <Ed p="hero.hello" />
         </span>
         <h1 className="hero-name intro d2" id="hero-name">
-          <span className="typed font-display">{typed}</span>
+          <span className="typed">{typed}</span>
           {!isTyping ? (
-            <Ed p="hero.dot" className="r font-display" ariaLabel="dot" />
+            <Ed p="hero.dot" className="r" ariaLabel="dot" />
           ) : null}
         </h1>
         <Ed p="hero.role" tag="p" className="hero-role intro d3" />
@@ -155,41 +140,26 @@ export function Hero() {
         </div>
       </div>
 
-      <div className={cn("hero-visual intro d3", editing && "no-float")}>
-        <figure
-          className="photo-card"
-          ref={figRef as React.RefObject<HTMLElement>}
-          onMouseMove={onTilt}
-          onMouseLeave={onTiltEnd}
-        >
-          {photoErr ? (
-            <div className="photo-fb font-display" role="img" aria-label={c.hero.photoAlt}>
-              WB
-            </div>
-          ) : (
-            <img
-              src={c.hero.photoUrl}
-              alt={c.hero.photoAlt}
-              width={640}
-              height={640}
-              loading="eager"
-              fetchPriority="high"
-              onError={() => setPhotoErr(true)}
-            />
-          )}
-          <figcaption className="font-hand">
-            <Ed p="hero.photoCaption" />
-          </figcaption>
-        </figure>
-
-        {/* Floating tech chips orbiting the photo (POPOLAB-style). */}
-        <div className="float-tags" aria-hidden={!editing}>
-          {c.hero.floatTags.map((tag, i) => (
-            <span className="float-tag" key={`ft-${i}`} style={{ ["--d" as string]: `${i * 0.7}s`, ["--tilt" as string]: `${(i % 2 === 0 ? -2.5 : 2.5) * (1 + (i % 3) * 0.6)}deg` }}>
-              <Ed p={`hero.floatTags.${i}`} />
-            </span>
-          ))}
-        </div>
+      {/* POPOLAB-style visual: the GTA artwork rises out of the giant word. */}
+      <div className="hero-visual intro d3">
+        {photoErr ? (
+          <div className="photo-fb font-display" role="img" aria-label={c.hero.photoAlt}>
+            WB
+          </div>
+        ) : (
+          <img
+            src={c.hero.photoUrl}
+            alt={c.hero.photoAlt}
+            width={730}
+            height={809}
+            loading="eager"
+            fetchPriority="high"
+            onError={() => setPhotoErr(true)}
+          />
+        )}
+        <span className="vis-note font-hand" aria-hidden={!editing}>
+          <Ed p="hero.photoCaption" />
+        </span>
       </div>
 
       <div className="hero-right">
@@ -204,7 +174,7 @@ export function Hero() {
             <div className="stat" key={`stat-${i}`}>
               <span className="num-row">
                 <CountNum target={st.n} />
-                {st.small ? <small className="n-small font-display">{st.small}</small> : null}
+                {st.small ? <small className="n-small">{st.small}</small> : null}
               </span>
               <span className="t">
                 {st.t}
